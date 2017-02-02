@@ -1,0 +1,18 @@
+Docker:
+    *Using broadinstitute/java-baseimage as supposedly they've worked
+     out java issues with it
+    *Can copy over jar files, but must compile objects within the docker,
+     or just use apt-get
+
+WDL:
+    *Seems to skip over command in runtime that don't make sense given
+     the current resource - i.e. invocations that make sense on the cloud
+     don't do anything locally, just a warning
+        *So I can use this to run the exact same pipeline anywhere,
+         and it should just ignore what doesn't make sense (theoretically)
+    *cromwell runtime can output a metadata file for output. Use this to
+     access the output files as metadata (JSON file)
+        ex: java -jar cromwell.jar run <wdl> <inputs> - <outpus.json>
+        the '-' skips that file
+
+Cloud:
