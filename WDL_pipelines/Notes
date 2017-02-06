@@ -3,6 +3,11 @@ Docker:
      out java issues with it
     *Can copy over jar files, but must compile objects within the docker,
      or just use apt-get
+    *Uploading Docker to Google Container Registry:
+        *First tag the docker with the required upload info
+            *docker tag basic-seq-tools us.gcr.io/dfci-cccb/basic-seq-tools
+        *Then upload the docker with gcloud utils
+            *gcloud docker -- push us.gcr.io/dfci-cccb/basic-seq-tools
 
 WDL:
     *Seems to skip over command in runtime that don't make sense given
@@ -16,3 +21,5 @@ WDL:
         the '-' skips that file
 
 Cloud:
+    *Upload to Google Container Registry (gcr.io)
+        *e.g. {docker: gcr.io/dfci-cccb/basic-seq-tools
