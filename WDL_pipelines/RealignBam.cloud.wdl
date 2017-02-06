@@ -1,5 +1,5 @@
 workflow RealignBam {
-    String bin_dir
+    #String bin_dir
 
     File inputsTSV
     Array[Array[File]] inputs_array = read_tsv(inputsTSV)
@@ -13,12 +13,9 @@ workflow RealignBam {
     File ref_ann
     File ref_pac
 
-    String bwa_commandline="bwa mem -K 100000000 -p -v 3 -t 16 $bash_ref_fasta"
+    String bwa_commandline="bwa mem -p -v 3 -t 3 $bash_ref_fasta"
 
-    call GetBwaVersion {
-        input:
-            bin_dir = bin_dir
-    }
+    call GetBwaVersion
 
     scatter (inputs in inputs_array) {
         #File input_bam = inputs[0]
@@ -27,19 +24,16 @@ workflow RealignBam {
         call RemoveNonProperPairs {
             input:
                 input_bam = inputs[0],
-                bin_dir = bin_dir,
                 output_bam_basename = inputs[1]
         }
         call UnmapBam {
             input:
                 input_bam = RemoveNonProperPairs.properpairs_bam,
-                output_bam_basename = inputs[1],
-                bin_dir = bin_dir
+                output_bam_basename = inputs[1]
         }
         call SamToFastqAndBwaMem {
             input:
                 input_bam = UnmapBam.output_bam,
-                bin_dir = bin_dir,
                 bwa_commandline = bwa_commandline,
                 output_bam_basename = inputs[1],
                 ref_fasta = ref_fasta,
@@ -61,7 +55,6 @@ workflow RealignBam {
                 ref_fasta = ref_fasta,
                 ref_fasta_index = ref_fasta_index,
                 ref_dict = ref_dict,
-                bin_dir = bin_dir
         }
     }
 }
@@ -71,16 +64,14 @@ workflow RealignBam {
 ##############################################################################
 
 task GetBwaVersion {
-    String bin_dir
-
     command {
-        ${bin_dir}/bwa 2>&1 | \
+        bwa 2>&1 | \
         grep -e '^Version' | \
         sed 's/Version: //'
     }
     runtime {
-        docker: ""
-        memory: "1GB"
+        docker: "basic-seq-tools"
+        memory: "1 GB"
     }
     output {
         String version = read_string(stdout())
@@ -89,13 +80,17 @@ task GetBwaVersion {
 
 task RemoveNonProperPairs {
     File input_bam
-    String bin_dir
     String output_bam_basename
 
     command {
-        ${bin_dir}/samtools view -f 2 -b \
+        samtools view -f 2 -b \
         -o ${output_bam_basename}.proper-pairs.bam \
         ${input_bam}
+    }
+    runtime {
+        docker: "basic-seq-tools"
+        memory: "2 GB"
+        cpu: "1"
     }
     output {
         File properpairs_bam = "${output_bam_basename}.proper-pairs.bam"
@@ -105,13 +100,17 @@ task RemoveNonProperPairs {
 task UnmapBam {
     File input_bam
     String output_bam_basename
-    String bin_dir
 
     command {
-        ${bin_dir}/java -Xmx2500m -jar ${bin_dir}/picard.jar \
+        java -Xmx2500m -jar /usr/workdir/picard.jar \
             RevertSam \
             I=${input_bam} \
             O=${output_bam_basename}.proper-pairs.unmapped.bam
+    }
+    runtime {
+        docker: "basic-seq-tools"
+        memory: "3 GB"
+        cpu: "2"
     }
     output {
         File output_bam = "${output_bam_basename}.proper-pairs.unmapped.bam"
@@ -120,7 +119,6 @@ task UnmapBam {
 
 task SamToFastqAndBwaMem {
     File input_bam
-    String bin_dir
     String bwa_commandline
     String output_bam_basename
 
@@ -137,15 +135,26 @@ task SamToFastqAndBwaMem {
         # set the bash variable needed for the command-line
         # initialized in workflow, but invoked here
         bash_ref_fasta=${ref_fasta}
-        ${bin_dir}/java -Xmx2500m -jar ${bin_dir}/picard.jar \
+        # May have a problem with picard here...
+        java -Xmx2500m -jar /usr/workdir/picard.jar \
             SamToFastq \
             INPUT=${input_bam} \
             FASTQ=/dev/stdout \
             INTERLEAVE=true \
             NON_PF=true | \
-        ${bin_dir}/${bwa_commandline} /dev/stdin -  2> >(tee ${output_bam_basename}.realn.bwa.stderr.log >&2) | \
-        ${bin_dir}/samtools view -1 - > ${output_bam_basename}.realn.bam
+        ${bwa_commandline} - 2> >(tee ${output_bam_basename}.realn.bwa.stderr.log >&2) > ${output_bam_basename}.realn.sam
+        #samtools view -b ${output_bam_basename}.realn.sam \
+        #> ${output_bam_basename}.realn.bam
+        java -Xmx2500m -jar /usr/workdir/picard.jar \
+            SamFormatConverter \
+            I=${output_bam_basename}.realn.sam \
+            O=${output_bam_basename}.realn.bam
     >>>
+    runtime {
+        docker: "basic-seq-tools"
+        memory: "6 GB"
+        cpu: "3"
+    }
     output {
         File output_bam = "${output_bam_basename}.realn.bam"
         File bwa_stderr_log = "${output_bam_basename}.realn.bwa.stderr.log"
@@ -162,10 +171,8 @@ task MergeBamAlignment {
     File ref_fasta_index
     File ref_dict
 
-    String bin_dir
-
     command {
-        ${bin_dir}/java -Xmx2500m -jar ${bin_dir}/picard.jar \
+        java -Xmx2500m -jar /usr/workdir/picard.jar \
             MergeBamAlignment \
             VALIDATION_STRINGENCY=SILENT \
             EXPECTED_ORIENTATIONS=FR \
@@ -189,7 +196,11 @@ task MergeBamAlignment {
             PROGRAM_GROUP_NAME="bwamem" \
             UNMAP_CONTAMINANT_READS=true
     }
-
+    runtime {
+        docker: "basic-seq-tools"
+        memory: "3 GB"
+        cpu: "4"
+    }
     output {
         File output_bam = "${output_bam_basename}.realn.info.bam"
     }

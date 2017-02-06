@@ -29,7 +29,7 @@ workflow RealignBam {
         call UnmapBam {
             input:
                 input_bam = RemoveNonProperPairs.properpairs_bam,
-                output_bam_basename = inputs[1],
+                output_bam_basename = inputs[1]
         }
         call SamToFastqAndBwaMem {
             input:
