@@ -23,3 +23,29 @@ WDL:
 Cloud:
     *Upload to Google Container Registry (gcr.io)
         *e.g. {docker: gcr.io/dfci-cccb/basic-seq-tools
+    *Docs:
+        *http://gatkforums.broadinstitute.org/gatk/discussion/8646/can-a-biochemist-with-one-python-course-under-her-belt-start-running-analyses-in-the-cloud
+        *https://github.com/googlegenomics/pipelines-api-examples/tree/master/wdl_runner
+    *Ran into problems moving and copying data. See:
+    done: true
+error:
+  code: 10
+  message: "15: Gsutil failed: failed to upload logs for \"gs://my-bucket/my-path/logging/\"\
+    : cp failed: gsutil -h Content-type:text/plain -q -m cp /var/log/google-genomics/*.log\
+    \ gs://my-bucket/my-path/logging/, command failed: AccessDeniedException: 403\
+    \ The account for bucket \"my-bucket\" has been disabled.\nAccessDeniedException:\
+    \ 403 The account for bucket \"my-bucket\" has been disabled.\nAccessDeniedException:\
+    \ 403 The account for bucket \"my-bucket\" has been disabled.\nCommandException:\
+    \ 3 files/objects could not be transferred.\n: "
+metadata:
+  events:
+  - description: start
+    startTime: '2017-02-07T23:11:13.585571102Z'
+  - description: pulling-image
+    startTime: '2017-02-07T23:11:13.586540052Z'
+  - description: localizing-files
+    startTime: '2017-02-07T23:11:56.644392259Z'
+  - description: running-docker
+    startTime: '2017-02-07T23:11:56.644433291Z'
+  - description: fail
+    startTime: '2017-02-07T23:15:34.161189704Z'
