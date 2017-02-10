@@ -1,0 +1,337 @@
+2017-02-10 22:56:13,426 cromwell-system-akka.actor.default-dispatcher-4 INFO  - Slf4jLogger started
+2017-02-10 22:56:13,501 cromwell-system-akka.actor.default-dispatcher-4 INFO  - Slf4jLogger started
+2017-02-10 22:56:16,948 cromwell-system-akka.actor.default-dispatcher-6 INFO  - Running with database db.url = jdbc:hsqldb:mem:e8e84530-90cf-4974-9361-3533a1a0a487;shutdown=false;hsqldb.tx=mvcc
+2017-02-10 22:56:17,317 cromwell-system-akka.actor.default-dispatcher-3 INFO  - Bound to /0.0.0.0:8000
+2017-02-10 22:56:17,342 cromwell-system-akka.actor.default-dispatcher-3 INFO  - Cromwell service started...
+2017-02-10 22:56:27,252 db-1 INFO  - Successfully acquired change log lock
+2017-02-10 22:56:27,316 db-1 INFO  - Creating database history table with name: PUBLIC.DATABASECHANGELOG
+2017-02-10 22:56:27,484 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer: Table WORKFLOW_EXECUTION created
+2017-02-10 22:56:27,493 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer: Table EXECUTION created
+2017-02-10 22:56:27,501 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer: Table JES_JOB created
+2017-02-10 22:56:27,505 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer: Table LOCAL_JOB created
+2017-02-10 22:56:27,510 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer: ChangeSet changesets/db_schema.xml::db_schema_other_table_alldb::scottfrazer ran successfully in 35ms
+2017-02-10 22:56:27,564 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_symbol_table_otherdb::scottfrazer: Table SYMBOL created
+2017-02-10 22:56:27,567 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_symbol_table_otherdb::scottfrazer: ChangeSet changesets/db_schema.xml::db_schema_symbol_table_otherdb::scottfrazer ran successfully in 17ms
+2017-02-10 22:56:27,578 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: Index STATUS_IDX created
+2017-02-10 22:56:27,595 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: Foreign key constraint added to SYMBOL (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:27,597 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: Foreign key constraint added to EXECUTION (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:27,604 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: Foreign key constraint added to JES_JOB (EXECUTION_ID)
+2017-02-10 22:56:27,612 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: Foreign key constraint added to LOCAL_JOB (EXECUTION_ID)
+2017-02-10 22:56:27,616 db-1 INFO  - changelog.xml: changesets/db_schema.xml::db_schema_constraints::scottfrazer: ChangeSet changesets/db_schema.xml::db_schema_constraints::scottfrazer ran successfully in 39ms
+2017-02-10 22:56:27,634 db-1 INFO  - changelog.xml: changesets/symbol_iteration_null.xml::symbol_iteration_null::kshakir: Null constraint dropped from SYMBOL.ITERATION
+2017-02-10 22:56:27,635 db-1 INFO  - changelog.xml: changesets/symbol_iteration_null.xml::symbol_iteration_null::kshakir: ChangeSet changesets/symbol_iteration_null.xml::symbol_iteration_null::kshakir ran successfully in 2ms
+2017-02-10 22:56:27,643 db-1 INFO  - changelog.xml: changesets/wdl_and_inputs.xml::WORKFLOW_EXECUTION_AUX::mcovarr: Table WORKFLOW_EXECUTION_AUX created
+2017-02-10 22:56:27,644 db-1 INFO  - changelog.xml: changesets/wdl_and_inputs.xml::WORKFLOW_EXECUTION_AUX::mcovarr: ChangeSet changesets/wdl_and_inputs.xml::WORKFLOW_EXECUTION_AUX::mcovarr ran successfully in 3ms
+2017-02-10 22:56:27,660 db-1 INFO  - changelog.xml: changesets/wdl_and_inputs.xml::WE_AUX_CONSTRAINTS::mcovarr: Foreign key constraint added to WORKFLOW_EXECUTION_AUX (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:27,664 db-1 INFO  - changelog.xml: changesets/wdl_and_inputs.xml::WE_AUX_CONSTRAINTS::mcovarr: Unique constraint added to WORKFLOW_EXECUTION_AUX(WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:27,667 db-1 INFO  - changelog.xml: changesets/wdl_and_inputs.xml::WE_AUX_CONSTRAINTS::mcovarr: ChangeSet changesets/wdl_and_inputs.xml::WE_AUX_CONSTRAINTS::mcovarr ran successfully in 9ms
+2017-02-10 22:56:27,693 db-1 INFO  - changelog.xml: changesets/drop_workflow_uri_and_local_command.xml::drop_workflow_uri_and_local_command::kshakir: Column WORKFLOW_EXECUTION.WDL_URI dropped
+2017-02-10 22:56:27,696 db-1 INFO  - changelog.xml: changesets/drop_workflow_uri_and_local_command.xml::drop_workflow_uri_and_local_command::kshakir: Column LOCAL_JOB.COMMAND dropped
+2017-02-10 22:56:27,702 db-1 INFO  - changelog.xml: changesets/drop_workflow_uri_and_local_command.xml::drop_workflow_uri_and_local_command::kshakir: ChangeSet changesets/drop_workflow_uri_and_local_command.xml::drop_workflow_uri_and_local_command::kshakir ran successfully in 17ms
+2017-02-10 22:56:27,707 db-1 INFO  - changelog.xml: changesets/local_job_allow_null.xml::local_job_allow_null::kshakir: Null constraint dropped from LOCAL_JOB.PID
+2017-02-10 22:56:27,708 db-1 INFO  - changelog.xml: changesets/local_job_allow_null.xml::local_job_allow_null::kshakir: Null constraint dropped from LOCAL_JOB.RC
+2017-02-10 22:56:27,708 db-1 INFO  - changelog.xml: changesets/local_job_allow_null.xml::local_job_allow_null::kshakir: ChangeSet changesets/local_job_allow_null.xml::local_job_allow_null::kshakir ran successfully in 3ms
+2017-02-10 22:56:27,717 db-1 INFO  - changelog.xml: changesets/symbol_iteration_not_null.xml::symbol_iteration_not_null::kshakir: Null constraint has been added to SYMBOL.ITERATION
+2017-02-10 22:56:27,721 db-1 INFO  - changelog.xml: changesets/symbol_iteration_not_null.xml::symbol_iteration_not_null::kshakir: ChangeSet changesets/symbol_iteration_not_null.xml::symbol_iteration_not_null::kshakir ran successfully in 5ms
+2017-02-10 22:56:27,730 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: Unique constraint added to WORKFLOW_EXECUTION(WORKFLOW_EXECUTION_UUID)
+2017-02-10 22:56:27,742 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: Unique constraint added to EXECUTION(WORKFLOW_EXECUTION_ID, CALL_FQN)
+2017-02-10 22:56:27,746 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: Unique constraint added to SYMBOL(WORKFLOW_EXECUTION_ID, SCOPE, NAME, ITERATION, IO)
+2017-02-10 22:56:27,753 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: Unique constraint added to LOCAL_JOB(EXECUTION_ID)
+2017-02-10 22:56:27,756 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: Unique constraint added to JES_JOB(EXECUTION_ID)
+2017-02-10 22:56:27,757 db-1 INFO  - changelog.xml: changesets/add_unique_constraints.xml::add_unique_constraints::kshakir: ChangeSet changesets/add_unique_constraints.xml::add_unique_constraints::kshakir ran successfully in 28ms
+2017-02-10 22:56:27,770 db-1 INFO  - changelog.xml: changesets/lengthen_wdl_value.xml::LENGTHEN_WDL_VALUE::sfrazer: SYMBOL.WDL_VALUE datatype was changed to LONGVARCHAR
+2017-02-10 22:56:27,772 db-1 INFO  - changelog.xml: changesets/lengthen_wdl_value.xml::LENGTHEN_WDL_VALUE::sfrazer: ChangeSet changesets/lengthen_wdl_value.xml::LENGTHEN_WDL_VALUE::sfrazer ran successfully in 7ms
+2017-02-10 22:56:27,782 db-1 INFO  - changelog.xml: changesets/add_index_in_execution.xml::add-index-in-execution::tjeandet: Columns INDEX(INT) added to EXECUTION
+2017-02-10 22:56:27,789 db-1 INFO  - changelog.xml: changesets/add_index_in_execution.xml::add-index-in-execution::tjeandet: Null constraint has been added to EXECUTION.INDEX
+2017-02-10 22:56:27,789 db-1 INFO  - changelog.xml: changesets/add_index_in_execution.xml::add-index-in-execution::tjeandet: ChangeSet changesets/add_index_in_execution.xml::add-index-in-execution::tjeandet ran successfully in 9ms
+2017-02-10 22:56:27,796 db-1 INFO  - changelog.xml: changesets/rename_iteration_to_index.xml::rename-iteration-to-index::tjeandet: Column SYMBOL.ITERATION renamed to INDEX
+2017-02-10 22:56:27,802 db-1 INFO  - changelog.xml: changesets/rename_iteration_to_index.xml::rename-iteration-to-index::tjeandet: ChangeSet changesets/rename_iteration_to_index.xml::rename-iteration-to-index::tjeandet ran successfully in 7ms
+2017-02-10 22:56:27,809 db-1 INFO  - changelog.xml: changesets/sge.xml::sge::scottfrazer: Table SGE_JOB created
+2017-02-10 22:56:27,811 db-1 INFO  - changelog.xml: changesets/sge.xml::sge::scottfrazer: ChangeSet changesets/sge.xml::sge::scottfrazer ran successfully in 5ms
+2017-02-10 22:56:27,823 db-1 INFO  - changelog.xml: changesets/sge.xml::db_schema_constraints::scottfrazer: Foreign key constraint added to SGE_JOB (EXECUTION_ID)
+2017-02-10 22:56:27,824 db-1 INFO  - changelog.xml: changesets/sge.xml::db_schema_constraints::scottfrazer: ChangeSet changesets/sge.xml::db_schema_constraints::scottfrazer ran successfully in 3ms
+2017-02-10 22:56:27,832 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: Foreign key FK_EXECUTION_WORKFLOW_EXECUTION_ID dropped
+2017-02-10 22:56:27,839 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: Unique constraint UK_EX_WORKFLOW_EXECUTION_ID dropped from EXECUTION
+2017-02-10 22:56:27,846 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: Unique constraint added to EXECUTION(WORKFLOW_EXECUTION_ID, CALL_FQN, INDEX)
+2017-02-10 22:56:27,853 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: Foreign key constraint added to EXECUTION (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:27,855 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: Column EXECUTION.INDEX renamed to IDX
+2017-02-10 22:56:27,857 db-1 INFO  - changelog.xml: changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet: ChangeSet changesets/change_execution_unique_constraint.xml::change_execution_unique_constraint::tjeandet ran successfully in 29ms
+2017-02-10 22:56:27,866 db-1 INFO  - changelog.xml: changesets/rc.xml::rc::mcovarr: Column LOCAL_JOB.RC dropped
+2017-02-10 22:56:27,869 db-1 INFO  - changelog.xml: changesets/rc.xml::rc::mcovarr: Columns RC(INT) added to EXECUTION
+2017-02-10 22:56:27,870 db-1 INFO  - changelog.xml: changesets/rc.xml::rc::mcovarr: ChangeSet changesets/rc.xml::rc::mcovarr ran successfully in 10ms
+2017-02-10 22:56:27,882 db-1 INFO  - changelog.xml: changesets/workflow_options.xml::workflow-options::sfrazer: Columns WORKFLOW_OPTIONS(LONGVARCHAR) added to WORKFLOW_EXECUTION_AUX
+2017-02-10 22:56:27,882 db-1 INFO  - changelog.xml: changesets/workflow_options.xml::workflow-options::sfrazer: ChangeSet changesets/workflow_options.xml::workflow-options::sfrazer ran successfully in 1ms
+2017-02-10 22:56:27,894 db-1 INFO  - changelog.xml: changesets/jes_id_update.xml::jes_id_update::chrisl: JES_JOB.JES_ID datatype was changed to VARCHAR(100)
+2017-02-10 22:56:27,895 db-1 INFO  - changelog.xml: changesets/jes_id_update.xml::jes_id_update::chrisl: JES_JOB.JES_STATUS datatype was changed to VARCHAR(100)
+2017-02-10 22:56:27,896 db-1 INFO  - changelog.xml: changesets/jes_id_update.xml::jes_id_update::chrisl: ChangeSet changesets/jes_id_update.xml::jes_id_update::chrisl ran successfully in 11ms
+2017-02-10 22:56:27,902 db-1 INFO  - changelog.xml: changesets/optional_sge_ids.xml::optional_sge_ids::chrisl: SGE_JOB.SGE_JOB_NUMBER datatype was changed to INT
+2017-02-10 22:56:27,907 db-1 INFO  - changelog.xml: changesets/optional_sge_ids.xml::optional_sge_ids::chrisl: ChangeSet changesets/optional_sge_ids.xml::optional_sge_ids::chrisl ran successfully in 7ms
+2017-02-10 22:56:27,921 db-1 INFO  - changelog.xml: changesets/add_start_end_time_in_execution.xml::add-start-end-time-in-execution::jgentry: Columns START_DT(datetime) added to EXECUTION
+2017-02-10 22:56:27,925 db-1 INFO  - changelog.xml: changesets/add_start_end_time_in_execution.xml::add-start-end-time-in-execution::jgentry: Columns END_DT(datetime) added to EXECUTION
+2017-02-10 22:56:27,925 db-1 INFO  - changelog.xml: changesets/add_start_end_time_in_execution.xml::add-start-end-time-in-execution::jgentry: ChangeSet changesets/add_start_end_time_in_execution.xml::add-start-end-time-in-execution::jgentry ran successfully in 15ms
+2017-02-10 22:56:27,930 db-1 INFO  - changelog.xml: changesets/rename_jes_id.xml::rename-jes-id-to-jes-run-id::sfrazer: Column JES_JOB.JES_ID renamed to JES_RUN_ID
+2017-02-10 22:56:27,931 db-1 INFO  - changelog.xml: changesets/rename_jes_id.xml::rename-jes-id-to-jes-run-id::sfrazer: ChangeSet changesets/rename_jes_id.xml::rename-jes-id-to-jes-run-id::sfrazer ran successfully in 2ms
+2017-02-10 22:56:27,947 db-1 INFO  - changelog.xml: changesets/add_workflow_name.xml::workflow-name::mcovarr: Columns WORKFLOW_NAME(VARCHAR(500)) added to WORKFLOW_EXECUTION
+2017-02-10 22:56:27,947 db-1 INFO  - changelog.xml: changesets/add_workflow_name.xml::workflow-name::mcovarr: ChangeSet changesets/add_workflow_name.xml::workflow-name::mcovarr ran successfully in 4ms
+2017-02-10 22:56:27,955 db-1 INFO  - changelog.xml: changesets/top_level_output.xml::top_level_output::chrisl: Columns REPORTABLE_RESULT(TINYINT) added to SYMBOL
+2017-02-10 22:56:27,956 db-1 INFO  - changelog.xml: changesets/top_level_output.xml::top_level_output::chrisl: ChangeSet changesets/top_level_output.xml::top_level_output::chrisl ran successfully in 4ms
+2017-02-10 22:56:27,965 db-1 INFO  - changelog.xml: changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet: Null constraint has been added to WORKFLOW_EXECUTION_AUX.WORKFLOW_EXECUTION_ID
+2017-02-10 22:56:27,967 db-1 INFO  - changelog.xml: changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet: Null constraint has been added to WORKFLOW_EXECUTION_AUX.WDL_SOURCE
+2017-02-10 22:56:27,969 db-1 INFO  - changelog.xml: changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet: Null constraint has been added to WORKFLOW_EXECUTION_AUX.JSON_INPUTS
+2017-02-10 22:56:27,972 db-1 INFO  - changelog.xml: changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet: Null constraint has been added to WORKFLOW_EXECUTION_AUX.WORKFLOW_OPTIONS
+2017-02-10 22:56:27,972 db-1 INFO  - changelog.xml: changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet: ChangeSet changesets/workflow_execution_aux_not_null.xml::workflow_execution_aux_not_null::tjeandet ran successfully in 11ms
+2017-02-10 22:56:28,000 db-1 INFO  - changelog.xml: changesets/call_result_caching.xml::call_result_caching::chrisl: Columns ALLOWS_RESULT_REUSE(BOOLEAN),DOCKER_IMAGE_HASH(VARCHAR(100)),RESULTS_CLONED_FROM(INT),EXECUTION_HASH(VARCHAR(100)) added to EXECUTION
+2017-02-10 22:56:28,003 db-1 INFO  - changelog.xml: changesets/call_result_caching.xml::call_result_caching::chrisl: Index HASH_INDEX created
+2017-02-10 22:56:28,008 db-1 INFO  - changelog.xml: changesets/call_result_caching.xml::call_result_caching::chrisl: Columns HASH(VARCHAR(100)) added to SYMBOL
+2017-02-10 22:56:28,013 db-1 INFO  - changelog.xml: changesets/call_result_caching.xml::call_result_caching::chrisl: Foreign key constraint added to EXECUTION (RESULTS_CLONED_FROM)
+2017-02-10 22:56:28,019 db-1 INFO  - changelog.xml: changesets/call_result_caching.xml::call_result_caching::chrisl: ChangeSet changesets/call_result_caching.xml::call_result_caching::chrisl ran successfully in 32ms
+2017-02-10 22:56:28,040 db-1 INFO  - changelog.xml: changesets/events_table.xml::execution_event_table::chrisl: Table EXECUTION_EVENT created
+2017-02-10 22:56:28,042 db-1 INFO  - changelog.xml: changesets/events_table.xml::execution_event_table::chrisl: Foreign key constraint added to EXECUTION_EVENT (EXECUTION_ID)
+2017-02-10 22:56:28,048 db-1 INFO  - changelog.xml: changesets/events_table.xml::execution_event_table::chrisl: Unique constraint added to EXECUTION_EVENT(EXECUTION_ID, DESCRIPTION)
+2017-02-10 22:56:28,049 db-1 INFO  - changelog.xml: changesets/events_table.xml::execution_event_table::chrisl: ChangeSet changesets/events_table.xml::execution_event_table::chrisl ran successfully in 15ms
+2017-02-10 22:56:28,061 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::job_not_null_columns::kshakir: Null constraint dropped from JES_JOB.JES_RUN_ID
+2017-02-10 22:56:28,072 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::job_not_null_columns::kshakir: Null constraint dropped from JES_JOB.JES_STATUS
+2017-02-10 22:56:28,072 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::job_not_null_columns::kshakir: Null constraint dropped from SGE_JOB.SGE_JOB_NUMBER
+2017-02-10 22:56:28,072 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::job_not_null_columns::kshakir: ChangeSet changesets/sync_not_null_constraints.xml::job_not_null_columns::kshakir ran successfully in 11ms
+2017-02-10 22:56:28,078 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::events_end_dt_not_null::kshakir: Null constraint has been added to EXECUTION_EVENT.END_DT
+2017-02-10 22:56:28,080 db-1 INFO  - changelog.xml: changesets/sync_not_null_constraints.xml::events_end_dt_not_null::kshakir: ChangeSet changesets/sync_not_null_constraints.xml::events_end_dt_not_null::kshakir ran successfully in 3ms
+2017-02-10 22:56:28,089 db-1 INFO  - changelog.xml: changesets/sge_job_execution_unique_key.xml::sge_job_execution_unique_key::kshakir: Unique constraint added to SGE_JOB(EXECUTION_ID)
+2017-02-10 22:56:28,090 db-1 INFO  - changelog.xml: changesets/sge_job_execution_unique_key.xml::sge_job_execution_unique_key::kshakir: ChangeSet changesets/sge_job_execution_unique_key.xml::sge_job_execution_unique_key::kshakir ran successfully in 2ms
+2017-02-10 22:56:28,100 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Columns ATTEMPT(INT) added to EXECUTION
+2017-02-10 22:56:28,101 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Null constraint has been added to EXECUTION.ATTEMPT
+2017-02-10 22:56:28,105 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Foreign key FK_EXECUTION_WORKFLOW dropped
+2017-02-10 22:56:28,106 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Unique constraint UK_WORKFLOW_CALL_INDEX dropped from EXECUTION
+2017-02-10 22:56:28,109 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Unique constraint added to EXECUTION(WORKFLOW_EXECUTION_ID, CALL_FQN, IDX, ATTEMPT)
+2017-02-10 22:56:28,113 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: Foreign key constraint added to EXECUTION (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:28,117 db-1 INFO  - changelog.xml: changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet: ChangeSet changesets/add_attempt_in_execution.xml::add-attempt-in-execution::tjeandet ran successfully in 24ms
+2017-02-10 22:56:28,128 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::CREATE_EXECUTION_INFO::mcovarr: Table EXECUTION_INFO created
+2017-02-10 22:56:28,131 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::CREATE_EXECUTION_INFO::mcovarr: ChangeSet changesets/execution_backend_info.xml::CREATE_EXECUTION_INFO::mcovarr ran successfully in 6ms
+2017-02-10 22:56:28,143 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::add_foreign_key_constraints::mcovarr: Foreign key constraint added to EXECUTION_INFO (EXECUTION_ID)
+2017-02-10 22:56:28,144 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::add_foreign_key_constraints::mcovarr: ChangeSet changesets/execution_backend_info.xml::add_foreign_key_constraints::mcovarr ran successfully in 4ms
+2017-02-10 22:56:28,156 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::add_backend_type_column::mcovarr: Columns BACKEND_TYPE(VARCHAR(255)) added to EXECUTION
+2017-02-10 22:56:28,156 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::add_backend_type_column::mcovarr: ChangeSet changesets/execution_backend_info.xml::add_backend_type_column::mcovarr ran successfully in 3ms
+2017-02-10 22:56:28,163 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::insert_data_from_backend_tables::mcovarr: Custom SQL executed
+2017-02-10 22:56:28,167 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::insert_data_from_backend_tables::mcovarr: ChangeSet changesets/execution_backend_info.xml::insert_data_from_backend_tables::mcovarr ran successfully in 8ms
+2017-02-10 22:56:28,178 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::set_backend_type::mcovarr: Custom SQL executed
+2017-02-10 22:56:28,179 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::set_backend_type::mcovarr: ChangeSet changesets/execution_backend_info.xml::set_backend_type::mcovarr ran successfully in 8ms
+2017-02-10 22:56:28,185 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::drop_job_tables::mcovarr: Table JES_JOB dropped
+2017-02-10 22:56:28,195 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::drop_job_tables::mcovarr: Table SGE_JOB dropped
+2017-02-10 22:56:28,196 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::drop_job_tables::mcovarr: Table LOCAL_JOB dropped
+2017-02-10 22:56:28,199 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::drop_job_tables::mcovarr: ChangeSet changesets/execution_backend_info.xml::drop_job_tables::mcovarr ran successfully in 15ms
+2017-02-10 22:56:28,212 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::execution_info_uniqueness_constraint::mcovarr: Unique constraint added to EXECUTION_INFO(EXECUTION_ID, INFO_KEY)
+2017-02-10 22:56:28,212 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::execution_info_uniqueness_constraint::mcovarr: ChangeSet changesets/execution_backend_info.xml::execution_info_uniqueness_constraint::mcovarr ran successfully in 2ms
+2017-02-10 22:56:28,214 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::execution_backend_type_not_null::mcovarr: Null constraint has been added to EXECUTION.BACKEND_TYPE
+2017-02-10 22:56:28,221 db-1 INFO  - changelog.xml: changesets/execution_backend_info.xml::execution_backend_type_not_null::mcovarr: ChangeSet changesets/execution_backend_info.xml::execution_backend_type_not_null::mcovarr ran successfully in 7ms
+2017-02-10 22:56:28,229 db-1 INFO  - changelog.xml: changesets/runtime_attributes_table.xml::runtime-attributes-table::tjeandet: Table RUNTIME_ATTRIBUTES created
+2017-02-10 22:56:28,232 db-1 INFO  - changelog.xml: changesets/runtime_attributes_table.xml::runtime-attributes-table::tjeandet: Foreign key constraint added to RUNTIME_ATTRIBUTES (EXECUTION_ID)
+2017-02-10 22:56:28,233 db-1 INFO  - changelog.xml: changesets/runtime_attributes_table.xml::runtime-attributes-table::tjeandet: Unique constraint added to RUNTIME_ATTRIBUTES(EXECUTION_ID, ATTRIBUTE_NAME)
+2017-02-10 22:56:28,239 db-1 INFO  - changelog.xml: changesets/runtime_attributes_table.xml::runtime-attributes-table::tjeandet: ChangeSet changesets/runtime_attributes_table.xml::runtime-attributes-table::tjeandet ran successfully in 15ms
+2017-02-10 22:56:28,255 db-1 INFO  - changelog.xml: changesets/failure_table.xml::failure_table::chrisl: Table FAILURE_EVENT created
+2017-02-10 22:56:28,259 db-1 INFO  - changelog.xml: changesets/failure_table.xml::failure_table::chrisl: Foreign key constraint added to FAILURE_EVENT (EXECUTION_ID)
+2017-02-10 22:56:28,263 db-1 INFO  - changelog.xml: changesets/failure_table.xml::failure_table::chrisl: Foreign key constraint added to FAILURE_EVENT (WORKFLOW_EXECUTION_ID)
+2017-02-10 22:56:28,267 db-1 INFO  - changelog.xml: changesets/failure_table.xml::failure_table::chrisl: ChangeSet changesets/failure_table.xml::failure_table::chrisl ran successfully in 14ms
+2017-02-10 22:56:28,283 db-1 INFO  - Successfully released change log lock
+2017-02-10 22:56:28,699 cromwell-system-akka.actor.default-dispatcher-5 INFO  - WorkflowManagerActor submitWorkflow input id = None, effective id = 9df7be32-1729-4821-81bf-cad1005f26e9
+2017-02-10 22:56:28,801 cromwell-system-akka.actor.default-dispatcher-6 INFO  - WorkflowManagerActor found no workflows to restart.
+2017-02-10 22:56:29,645 cromwell-system-akka.actor.default-dispatcher-3 WARN  - Unrecognized workflow option(s): defaultRuntimeOptions
+2017-02-10 22:56:30,967 cromwell-system-akka.actor.default-dispatcher-5 INFO  - Updating WorkflowManager state. New Data: (9df7be32-1729-4821-81bf-cad1005f26e9,Actor[akka://cromwell-system/user/WorkflowManagerActorServerMode/WorkflowActor-9df7be32-1729-4821-81bf-cad1005f26e9#-1676608374])
+2017-02-10 22:56:31,002 cromwell-system-akka.actor.default-dispatcher-6 INFO  - WorkflowActor [UUID(9df7be32)]: Start(Some(Actor[akka://cromwell-system/user/cromwell-service/Endpoint-endpointActorName83930317994/Endpoint-endpointActorName83930317994#2016933035])) message received
+2017-02-10 22:56:31,618 cromwell-system-akka.actor.default-dispatcher-5 INFO  - WorkflowActor [UUID(9df7be32)]: ExecutionStoreCreated(Start(Some(Actor[akka://cromwell-system/user/cromwell-service/Endpoint-endpointActorName83930317994/Endpoint-endpointActorName83930317994#2016933035]))) message received
+2017-02-10 22:56:31,665 cromwell-system-akka.actor.default-dispatcher-5 INFO  - WorkflowActor [UUID(9df7be32)]: Beginning transition from Submitted to Running.
+2017-02-10 22:56:31,669 cromwell-system-akka.actor.default-dispatcher-5 INFO  - WorkflowActor [UUID(9df7be32)]: transitioning from Submitted to Running.
+2017-02-10 22:56:31,682 cromwell-system-akka.actor.default-dispatcher-3 INFO  - WorkflowActor [UUID(9df7be32)]: starting calls: RealignBam.GetBwaVersion
+2017-02-10 22:56:31,704 cromwell-system-akka.actor.default-dispatcher-7 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of GetBwaVersion to Starting.
+2017-02-10 22:56:32,146 cromwell-system-akka.actor.default-dispatcher-7 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of $scatter_0 to Starting.
+2017-02-10 22:56:32,380 cromwell-system-akka.actor.default-dispatcher-7 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of $scatter_0 to Done.
+2017-02-10 22:56:32,443 cromwell-system-akka.actor.default-dispatcher-2 INFO  - WorkflowActor [UUID(9df7be32)]: no inputs for call 'GetBwaVersion'
+2017-02-10 22:56:32,462 cromwell-system-akka.actor.default-dispatcher-6 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for GetBwaVersion.
+2017-02-10 22:56:32,491 cromwell-system-akka.actor.default-dispatcher-7 INFO  - WorkflowActor [UUID(9df7be32)]: starting calls: RealignBam.RemoveNonProperPairs, RealignBam.RemoveNonProperPairs
+2017-02-10 22:56:32,495 cromwell-system-akka.actor.default-dispatcher-7 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:1 to Starting.
+2017-02-10 22:56:32,519 cromwell-system-akka.actor.default-dispatcher-7 INFO  - JesBackend [UUID(9df7be32):GetBwaVersion]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-GetBwaVersion
+2017-02-10 22:56:32,583 cromwell-system-akka.actor.default-dispatcher-2 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0 to Starting.
+2017-02-10 22:56:32,638 cromwell-system-akka.actor.default-dispatcher-7 INFO  - JesBackend [UUID(9df7be32):GetBwaVersion]: `bwa 2>&1 | \
+grep -e '^Version' | \
+sed 's/Version: //'`
+2017-02-10 22:56:32,711 cromwell-system-akka.actor.default-dispatcher-2 INFO  - WorkflowActor [UUID(9df7be32)]: inputs for call 'RemoveNonProperPairs:1':
+  disk_size -> WdlInteger(300)
+  input_bam -> WdlSingleFile(gs://dfci-testgenomes/HG00097.chrom20.ILLUMINA.bwa.GBR.exome.20130415.bam)
+  output_bam_basename -> WdlString(HG00097)
+  preemptible_tries -> WdlInteger(3)
+2017-02-10 22:56:32,747 cromwell-system-akka.actor.default-dispatcher-4 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for RemoveNonProperPairs:1.
+2017-02-10 22:56:32,752 cromwell-system-akka.actor.default-dispatcher-4 INFO  - WorkflowActor [UUID(9df7be32)]: inputs for call 'RemoveNonProperPairs:0':
+  disk_size -> WdlInteger(300)
+  input_bam -> WdlSingleFile(gs://dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam)
+  output_bam_basename -> WdlString(HG00096)
+  preemptible_tries -> WdlInteger(3)
+2017-02-10 22:56:32,753 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:1]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1
+2017-02-10 22:56:32,762 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0
+2017-02-10 22:56:32,770 cromwell-system-akka.actor.default-dispatcher-4 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for RemoveNonProperPairs:0.
+2017-02-10 22:56:32,833 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0]: `samtools view -f 2 -b \
+-o HG00096.proper-pairs.bam \
+dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam`
+2017-02-10 22:56:32,834 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:1]: `samtools view -f 2 -b \
+-o HG00097.proper-pairs.bam \
+dfci-testgenomes/HG00097.chrom20.ILLUMINA.bwa.GBR.exome.20130415.bam`
+2017-02-10 22:56:33,371 cromwell-system-akka.actor.default-dispatcher-4 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:1 to Running.
+2017-02-10 22:56:33,408 cromwell-system-akka.actor.default-dispatcher-7 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: Inputs:
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-GetBwaVersion/exec.sh
+2017-02-10 22:56:33,411 cromwell-system-akka.actor.default-dispatcher-7 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: Outputs:
+  GetBwaVersion-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-GetBwaVersion/GetBwaVersion-rc.txt
+2017-02-10 22:56:33,731 cromwell-system-akka.actor.default-dispatcher-7 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: JES Run ID is operations/EPqW-NGiKxjr_OfAn_iNnTUggJ2TgoYcKg9wcm9kdWN0aW9uUXVldWU
+2017-02-10 22:56:33,844 cromwell-system-akka.actor.default-dispatcher-3 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: Status change from - to Initializing
+2017-02-10 22:56:34,031 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:1]: Starting call with pre-emptible VM
+2017-02-10 22:56:34,033 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: Inputs:
+  input_bam-0 -> gs://dfci-testgenomes/HG00097.chrom20.ILLUMINA.bwa.GBR.exome.20130415.bam
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/exec.sh
+2017-02-10 22:56:34,034 cromwell-system-akka.actor.default-dispatcher-3 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of GetBwaVersion to Running.
+2017-02-10 22:56:34,036 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: Outputs:
+  RemoveNonProperPairs-1-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/RemoveNonProperPairs-1-rc.txt
+  HG00097.proper-pairs.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/HG00097.proper-pairs.bam
+2017-02-10 22:56:34,273 cromwell-system-akka.actor.default-dispatcher-5 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: JES Run ID is operations/EJeb-NGiKxiOttb68azuqvQBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl
+2017-02-10 22:56:34,355 cromwell-system-akka.actor.default-dispatcher-3 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: Status change from - to Initializing
+2017-02-10 22:56:34,586 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0]: Starting call with pre-emptible VM
+2017-02-10 22:56:34,587 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: Inputs:
+  input_bam-0 -> gs://dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/exec.sh
+2017-02-10 22:56:34,587 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: Outputs:
+  RemoveNonProperPairs-0-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/RemoveNonProperPairs-0-rc.txt
+  HG00096.proper-pairs.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/HG00096.proper-pairs.bam
+2017-02-10 22:56:34,614 cromwell-system-akka.actor.default-dispatcher-3 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0 to Running.
+2017-02-10 22:56:34,807 cromwell-system-akka.actor.default-dispatcher-2 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: JES Run ID is operations/EKKf-NGiKxjTvIn2zbGdrnUggJ2TgoYcKg9wcm9kdWN0aW9uUXVldWU
+2017-02-10 22:56:34,910 cromwell-system-akka.actor.default-dispatcher-3 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: Status change from - to Initializing
+2017-02-10 22:57:00,907 cromwell-system-akka.actor.default-dispatcher-6 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: Status change from Initializing to Running
+2017-02-10 22:57:02,914 cromwell-system-akka.actor.default-dispatcher-15 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: Status change from Initializing to Running
+2017-02-10 22:57:10,772 cromwell-system-akka.actor.default-dispatcher-14 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: Status change from Initializing to Running
+2017-02-10 22:58:14,472 cromwell-system-akka.actor.default-dispatcher-19 INFO  - JES Run [UUID(9df7be32):GetBwaVersion]: Status change from Running to Success
+2017-02-10 22:58:14,809 cromwell-system-akka.actor.default-dispatcher-16 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of GetBwaVersion to Done.
+2017-02-10 22:58:19,570 cromwell-system-akka.actor.default-dispatcher-6 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0]: Status change from Running to Failed
+2017-02-10 22:58:19,607 cromwell-system-akka.actor.default-dispatcher-25 ERROR - CallActor [UUID(9df7be32):RemoveNonProperPairs:0]: Failing call with retryable Failure: Task 9df7be32-1729-4821-81bf-cad1005f26e9:RemoveNonProperPairs was preempted for the 1st time. The call will be restarted with another preemptible VM (max preemptible attempts number is 3).
+Error code 10. Message: Some(14: VM ggp-8456763448188100179 stopped unexpectedly.)
+cromwell.engine.package$PreemptedException: Task 9df7be32-1729-4821-81bf-cad1005f26e9:RemoveNonProperPairs was preempted for the 1st time. The call will be restarted with another preemptible VM (max preemptible attempts number is 3).
+Error code 10. Message: Some(14: VM ggp-8456763448188100179 stopped unexpectedly.)
+	at cromwell.engine.backend.jes.JesBackend.cromwell$engine$backend$jes$JesBackend$$handleFailure(JesBackend.scala:803) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:726) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:700) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[cromwell.jar:0.19]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40) ~[cromwell.jar:0.19]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:397) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) [cromwell.jar:0.19]
+2017-02-10 22:58:19,608 cromwell-system-akka.actor.default-dispatcher-25 ERROR - WorkflowActor [UUID(9df7be32)]: Task 9df7be32-1729-4821-81bf-cad1005f26e9:RemoveNonProperPairs was preempted for the 1st time. The call will be restarted with another preemptible VM (max preemptible attempts number is 3).
+Error code 10. Message: Some(14: VM ggp-8456763448188100179 stopped unexpectedly.)
+2017-02-10 22:58:19,608 cromwell-system-akka.actor.default-dispatcher-25 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0 to Preempted.
+2017-02-10 22:58:19,651 cromwell-system-akka.actor.default-dispatcher-25 INFO  - WorkflowActor [UUID(9df7be32)]: starting calls: RealignBam.RemoveNonProperPairs
+2017-02-10 22:58:19,652 cromwell-system-akka.actor.default-dispatcher-25 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0:2 to Starting.
+2017-02-10 22:58:19,700 cromwell-system-akka.actor.default-dispatcher-25 INFO  - WorkflowActor [UUID(9df7be32)]: inputs for call 'RemoveNonProperPairs:0:2':
+  disk_size -> WdlInteger(300)
+  input_bam -> WdlSingleFile(gs://dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam)
+  output_bam_basename -> WdlString(HG00096)
+  preemptible_tries -> WdlInteger(3)
+2017-02-10 22:58:19,704 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0:2]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2
+2017-02-10 22:58:19,709 cromwell-system-akka.actor.default-dispatcher-26 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for RemoveNonProperPairs:0:2.
+2017-02-10 22:58:19,715 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0:2]: `samtools view -f 2 -b \
+-o HG00096.proper-pairs.bam \
+dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam`
+2017-02-10 22:58:19,718 cromwell-system-akka.actor.default-dispatcher-26 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0:2 to Running.
+2017-02-10 22:58:20,166 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JesBackend [UUID(9df7be32):RemoveNonProperPairs:0:2]: Starting call with pre-emptible VM
+2017-02-10 22:58:20,167 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: Inputs:
+  input_bam-0 -> gs://dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/exec.sh
+2017-02-10 22:58:20,167 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: Outputs:
+  RemoveNonProperPairs-0-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/RemoveNonProperPairs-0-rc.txt
+  HG00096.proper-pairs.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/HG00096.proper-pairs.bam
+2017-02-10 22:58:20,361 cromwell-system-akka.actor.default-dispatcher-25 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: JES Run ID is operations/EIzY_tGiKxid1Oz4_9Ol8h0ggJ2TgoYcKg9wcm9kdWN0aW9uUXVldWU
+2017-02-10 22:58:20,447 cromwell-system-akka.actor.default-dispatcher-26 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: Status change from - to Initializing
+2017-02-10 22:58:26,556 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:1]: Status change from Running to Success
+2017-02-10 22:58:26,812 cromwell-system-akka.actor.default-dispatcher-9 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:1 to Done.
+2017-02-10 22:58:26,832 cromwell-system-akka.actor.default-dispatcher-19 INFO  - WorkflowActor [UUID(9df7be32)]: starting calls: RealignBam.UnmapBam
+2017-02-10 22:58:26,833 cromwell-system-akka.actor.default-dispatcher-19 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:1 to Starting.
+2017-02-10 22:58:26,899 cromwell-system-akka.actor.default-dispatcher-19 INFO  - WorkflowActor [UUID(9df7be32)]: inputs for call 'UnmapBam:1':
+  disk_size -> WdlInteger(300)
+  input_bam -> WdlSingleFile(gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/HG00097.proper-pairs.bam)
+  output_bam_basename -> WdlString(HG00097)
+  preemptible_tries -> WdlInteger(3)
+2017-02-10 22:58:26,900 cromwell-system-akka.actor.default-dispatcher-6 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for UnmapBam:1.
+2017-02-10 22:58:26,901 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JesBackend [UUID(9df7be32):UnmapBam:1]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1
+2017-02-10 22:58:26,904 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JesBackend [UUID(9df7be32):UnmapBam:1]: `java -Xmx2500m -jar /usr/workdir/picard.jar \
+    RevertSam \
+    I=dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/HG00097.proper-pairs.bam \
+    O=HG00097.proper-pairs.unmapped.bam`
+2017-02-10 22:58:26,912 cromwell-system-akka.actor.default-dispatcher-10 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:1 to Running.
+2017-02-10 22:58:27,431 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JesBackend [UUID(9df7be32):UnmapBam:1]: Starting call with pre-emptible VM
+2017-02-10 22:58:27,432 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: Inputs:
+  input_bam-0 -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-1/HG00097.proper-pairs.bam
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/exec.sh
+2017-02-10 22:58:27,433 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: Outputs:
+  UnmapBam-1-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/UnmapBam-1-rc.txt
+  HG00097.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam
+2017-02-10 22:58:27,606 cromwell-system-akka.actor.default-dispatcher-4 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: JES Run ID is operations/ENmQ_9GiKxi1oJCilMaa3MEBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl
+2017-02-10 22:58:27,688 cromwell-system-akka.actor.default-dispatcher-10 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: Status change from - to Initializing
+2017-02-10 22:58:41,961 cromwell-system-akka.actor.default-dispatcher-27 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: Status change from Initializing to Running
+2017-02-10 22:58:54,856 cromwell-system-akka.actor.default-dispatcher-6 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: Status change from Initializing to Running
+2017-02-10 23:00:31,898 cromwell-system-akka.actor.default-dispatcher-16 INFO  - JES Run [UUID(9df7be32):RemoveNonProperPairs:0:2]: Status change from Running to Success
+2017-02-10 23:00:32,343 cromwell-system-akka.actor.default-dispatcher-16 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs:0:2 to Done.
+2017-02-10 23:00:32,370 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: starting calls: RealignBam.UnmapBam
+2017-02-10 23:00:32,371 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs to Starting.
+2017-02-10 23:00:32,387 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: Collection complete for Scattered Call RemoveNonProperPairs.
+2017-02-10 23:00:32,391 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:0 to Starting.
+2017-02-10 23:00:32,433 cromwell-system-akka.actor.default-dispatcher-42 INFO  - WorkflowActor [UUID(9df7be32)]: inputs for call 'UnmapBam:0':
+  disk_size -> WdlInteger(300)
+  input_bam -> WdlSingleFile(gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/HG00096.proper-pairs.bam)
+  output_bam_basename -> WdlString(HG00096)
+  preemptible_tries -> WdlInteger(3)
+2017-02-10 23:00:32,434 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of RemoveNonProperPairs to Done.
+2017-02-10 23:00:32,440 cromwell-system-akka.actor.default-dispatcher-47 INFO  - WorkflowActor [UUID(9df7be32)]: created call actor for UnmapBam:0.
+2017-02-10 23:00:32,450 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JesBackend [UUID(9df7be32):UnmapBam:0]: Call GCS path: gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0
+2017-02-10 23:00:32,453 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JesBackend [UUID(9df7be32):UnmapBam:0]: `java -Xmx2500m -jar /usr/workdir/picard.jar \
+    RevertSam \
+    I=dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/HG00096.proper-pairs.bam \
+    O=HG00096.proper-pairs.unmapped.bam`
+2017-02-10 23:00:32,472 cromwell-system-akka.actor.default-dispatcher-49 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:0 to Running.
+2017-02-10 23:00:32,986 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JesBackend [UUID(9df7be32):UnmapBam:0]: Starting call with pre-emptible VM
+2017-02-10 23:00:32,987 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: Inputs:
+  input_bam-0 -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-RemoveNonProperPairs/shard-0/attempt-2/HG00096.proper-pairs.bam
+  exec -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/exec.sh
+2017-02-10 23:00:32,989 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: Outputs:
+  UnmapBam-0-rc.txt -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/UnmapBam-0-rc.txt
+  HG00096.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam
+2017-02-10 23:00:33,195 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: JES Run ID is operations/EO3lhtKiKxiBt_qRwJvgzuEBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl
+2017-02-10 23:00:33,264 cromwell-system-akka.actor.default-dispatcher-27 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: Status change from - to Initializing
+2017-02-10 23:00:43,911 cromwell-system-akka.actor.default-dispatcher-39 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: Status change from Initializing to Running
+2017-02-10 23:03:26,655 cromwell-system-akka.actor.default-dispatcher-72 INFO  - JES Run [UUID(9df7be32):UnmapBam:1]: Status change from Running to Failed
+2017-02-10 23:03:26,674 cromwell-system-akka.actor.default-dispatcher-73 ERROR - CallActor [UUID(9df7be32):UnmapBam:1]: Failing call: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00097.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00097.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00097.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+java.lang.Throwable: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00097.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00097.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00097.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+	at cromwell.engine.backend.jes.JesBackend.cromwell$engine$backend$jes$JesBackend$$handleFailure(JesBackend.scala:815) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:726) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:700) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[cromwell.jar:0.19]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40) ~[cromwell.jar:0.19]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:397) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) [cromwell.jar:0.19]
+2017-02-10 23:03:26,681 cromwell-system-akka.actor.default-dispatcher-73 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:1 to Failed.
+2017-02-10 23:03:26,682 cromwell-system-akka.actor.default-dispatcher-73 ERROR - WorkflowActor [UUID(9df7be32)]: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00097.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00097.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-1/HG00097.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00097.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+2017-02-10 23:06:17,637 cromwell-system-akka.actor.default-dispatcher-108 INFO  - JES Run [UUID(9df7be32):UnmapBam:0]: Status change from Running to Failed
+2017-02-10 23:06:17,649 cromwell-system-akka.actor.default-dispatcher-85 ERROR - CallActor [UUID(9df7be32):UnmapBam:0]: Failing call: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00096.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00096.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00096.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+java.lang.Throwable: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00096.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00096.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00096.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+	at cromwell.engine.backend.jes.JesBackend.cromwell$engine$backend$jes$JesBackend$$handleFailure(JesBackend.scala:815) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:726) ~[cromwell.jar:0.19]
+	at cromwell.engine.backend.jes.JesBackend$$anonfun$executionResult$1.apply(JesBackend.scala:700) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.liftedTree1$1(Future.scala:24) ~[cromwell.jar:0.19]
+	at scala.concurrent.impl.Future$PromiseCompletingRunnable.run(Future.scala:24) ~[cromwell.jar:0.19]
+	at akka.dispatch.TaskInvocation.run(AbstractDispatcher.scala:40) ~[cromwell.jar:0.19]
+	at akka.dispatch.ForkJoinExecutorConfigurator$AkkaForkJoinTask.exec(AbstractDispatcher.scala:397) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinTask.doExec(ForkJoinTask.java:260) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool$WorkQueue.runTask(ForkJoinPool.java:1339) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinPool.runWorker(ForkJoinPool.java:1979) [cromwell.jar:0.19]
+	at scala.concurrent.forkjoin.ForkJoinWorkerThread.run(ForkJoinWorkerThread.java:107) [cromwell.jar:0.19]
+2017-02-10 23:06:17,660 cromwell-system-akka.actor.default-dispatcher-98 INFO  - WorkflowActor [UUID(9df7be32)]: persisting status of UnmapBam:0 to Failed.
+2017-02-10 23:06:17,667 cromwell-system-akka.actor.default-dispatcher-98 ERROR - WorkflowActor [UUID(9df7be32)]: Task 9df7be32-1729-4821-81bf-cad1005f26e9:UnmapBam failed: error code 5. Message: 10: Failed to delocalize files: failed to copy the following files: "/mnt/local-disk/HG00096.proper-pairs.unmapped.bam -> gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam (cp failed: gsutil -q -m cp -L /var/log/google-genomics/out.log /mnt/local-disk/HG00096.proper-pairs.unmapped.bam gs://dfci-testgenomes/workspace/RealignBam/9df7be32-1729-4821-81bf-cad1005f26e9/call-UnmapBam/shard-0/HG00096.proper-pairs.unmapped.bam, command failed: CommandException: No URLs matched: /mnt/local-disk/HG00096.proper-pairs.unmapped.bam\nCommandException: 1 file/object could not be transferred.\n)"
+2017-02-10 23:06:17,691 cromwell-system-akka.actor.default-dispatcher-111 INFO  - WorkflowActor [UUID(9df7be32)]: Beginning transition from Running to Failed.
+2017-02-10 23:06:20,237 cromwell-system-akka.actor.default-dispatcher-98 INFO  - WorkflowActor [UUID(9df7be32)]: transitioning from Running to Failed.
