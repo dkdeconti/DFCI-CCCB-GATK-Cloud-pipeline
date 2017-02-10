@@ -6,8 +6,8 @@ inputParameters:
   description: Workflow definition
 - name: WORKFLOW_INPUTS
   description: Workflow inputs
-- name: WORKFLOW_OPTIONS
-  description: Workflow options
+#- name: WORKFLOW_OPTIONS
+#  description: Workflow options
 
 - name: WORKSPACE
   description: Cloud Storage path for intermediate files
@@ -15,7 +15,7 @@ inputParameters:
   description: Cloud Storage path for output files
 
 docker:
-  imageName: gcr.io/broad-dsde-outreach/wdl_runner
+  imageName: gcr.io/dfci-cccb/cromwell-launcher
 
   cmd: >
     /wdl_runner/wdl_runner.sh

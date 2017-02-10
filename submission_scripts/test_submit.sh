@@ -7,13 +7,24 @@ gcloud alpha genomics pipelines run \
   --logging gs://dfci-testgenomes/logging \
   --inputs-from-file WDL=RealignBam.cloud.wdl \
   --inputs-from-file WORKFLOW_INPUTS=RealignBam.cloud.inputs.json \
+  --inputs-from-file WORKFLOW_OPTIONS=RealignBam.cloud.options.json \
+  --inputs WORKSPACE=gs://dfci-testgenomes/workspace \
+  --inputs OUTPUTS=gs://dfci-testgenomes/outputs
+
+# Call pipeline without options files
+gcloud alpha genomics pipelines run \
+  --pipeline-file wdl_pipeline.yaml \
+  --zones us-east1-b \
+  --logging gs://dfci-testgenomes/logging \
+  --inputs-from-file WDL=RealignBam.cloud.wdl \
+  --inputs-from-file WORKFLOW_INPUTS=RealignBam.cloud.inputs.json \
   --inputs WORKSPACE=gs://dfci-testgenomes/workspace \
   --inputs OUTPUTS=gs://dfci-testgenomes/outputs
 
 # --inputs-from-file WORKFLOW_OPTIONS=RealignBam.cloud.options.json \
 
 # Output to track the pipeline
-Running [operations/ENTxy6uiKxjbxbKq2Irh0boBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl].
+Running [operations/EOqel9GiKxjTm42n4Y6Pi6IBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl]. 
 
 # Check the status of the pipeline
 gcloud alpha genomics operations describe operation-id \

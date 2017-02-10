@@ -132,9 +132,11 @@ class Runner(object):
     logging.info("starting")
 
     # Submit the job to the local Cromwell server
+    #(result, metadata) = self.driver.submit(self.args.wdl,
+    #                                        self.args.workflow_inputs,
+    #                                        self.args.workflow_options)
     (result, metadata) = self.driver.submit(self.args.wdl,
-                                            self.args.workflow_inputs,
-                                            self.args.workflow_options)
+                                            self.args.workflow_inputs)
     logging.info(result)
 
     # Copy run metadata and output files to the output directory
@@ -150,8 +152,8 @@ def main():
                       help='The WDL file to run')
   parser.add_argument('--workflow-inputs', required=True,
                       help='The workflow inputs (JSON) file')
-  parser.add_argument('--workflow-options', required=False,
-                      help='The workflow options (JSON) file')
+  #parser.add_argument('--workflow-options', required=False,
+  #                    help='The workflow options (JSON) file')
   parser.add_argument('--project', required=False,
                       help='The Cloud project id')
   parser.add_argument('--working-dir', required=True,

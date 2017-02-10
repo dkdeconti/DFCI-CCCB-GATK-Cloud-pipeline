@@ -25,17 +25,21 @@ readonly INPUT_PATH=/pipeline/input
 mkdir -p "${INPUT_PATH}"
 echo "${WDL}" > "${INPUT_PATH}/wf.wdl"
 echo "${WORKFLOW_INPUTS}" > "${INPUT_PATH}/wf.inputs.json"
-echo "${WORKFLOW_OPTIONS}" > "${INPUT_PATH}/wf.options.json"
+#echo "${WORKFLOW_OPTIONS}" > "${INPUT_PATH}/wf.options.json"
 
 # Set the working directory to the location of the scripts
 readonly SCRIPT_DIR=$(dirname $0)
 cd "${SCRIPT_DIR}"
 
 # Execute the wdl_runner
+#python -u wdl_runner.py \
+# --wdl "${INPUT_PATH}"/wf.wdl \
+# --workflow-inputs "${INPUT_PATH}"/wf.inputs.json \
+# --working-dir "${WORKSPACE}" \
+# --workflow-options "${INPUT_PATH}"/wf.options.json \
+# --output-dir "${OUTPUTS}"
 python -u wdl_runner.py \
  --wdl "${INPUT_PATH}"/wf.wdl \
  --workflow-inputs "${INPUT_PATH}"/wf.inputs.json \
  --working-dir "${WORKSPACE}" \
- --workflow-options "${INPUT_PATH}"/wf.options.json \
  --output-dir "${OUTPUTS}"
-

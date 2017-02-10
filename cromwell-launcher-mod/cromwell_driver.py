@@ -32,6 +32,7 @@ import sys_util
 
 
 class CromwellDriver(object):
+  '''CromwellDriver'''
 
   def __init__(self, cromwell_conf, cromwell_jar):
     self.cromwell_conf = cromwell_conf
@@ -65,7 +66,8 @@ class CromwellDriver(object):
       r = requests.get(url)
     return r.json()
 
-  def submit(self, wdl, workflow_inputs, workflow_options, sleep_time=15):
+  #def submit(self, wdl, workflow_inputs, workflow_options, sleep_time=15):
+  def submit(self, wdl, workflow_inputs, sleep_time=15):
     """Post new job to the server and poll for completion."""
 
     # Add required input files
@@ -80,10 +82,10 @@ class CromwellDriver(object):
     }
 
     # Add workflow options if specified
-    if workflow_options:
-      with open(workflow_options, 'rb') as f:
-        wf_options = f.read()
-        files['workflowOptions'] = wf_options
+    #if workflow_options:
+    #  with open(workflow_options, 'rb') as f:
+    #    wf_options = f.read()
+    #    files['workflowOptions'] = wf_options
 
     # After Cromwell start, it may take a few seconds to be ready for requests.
     # Poll up to a minute for successful connect and submit.
