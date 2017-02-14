@@ -24,7 +24,7 @@ gcloud alpha genomics pipelines run \
 # --inputs-from-file WORKFLOW_OPTIONS=RealignBam.cloud.options.json \
 
 # Output to track the pipeline
-Running [operations/EM3b8NGiKxjNjez64KTF0fUBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl].
+Running [operations/ELK9zOyjKxjrsaHo2pLUiXUggJ2TgoYcKg9wcm9kdWN0aW9uUXVldWU].
 
 # Check the status of the pipeline
 gcloud alpha genomics operations describe operation-id \

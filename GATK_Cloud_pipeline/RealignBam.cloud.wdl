@@ -182,7 +182,9 @@ task SamToFastqAndBwaMem {
             FASTQ=/dev/stdout \
             INTERLEAVE=true \
             NON_PF=true | \
-        ${bwa_commandline} - 2> >(tee ${output_bam_basename}.realn.bwa.stderr.log >&2) > ${output_bam_basename}.realn.sam
+        ${bwa_commandline} - \
+        2> >(tee ${output_bam_basename}.realn.bwa.stderr.log >&2) \
+        > ${output_bam_basename}.realn.sam
         #samtools view -b ${output_bam_basename}.realn.sam \
         #> ${output_bam_basename}.realn.bam
         java -Xmx2500m -jar /usr/bin_dir/picard.jar \
