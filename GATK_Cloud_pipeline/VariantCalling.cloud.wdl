@@ -83,6 +83,49 @@ workflow RealignBam {
                 disk_size = large_disk,
                 preemptible_tries = preemptible_tries
         }
+        call SortAndFixTags {
+            input:
+                input_bam = MergeBamAlignment.output_bam,
+                output_bam_basename = inputs[1],
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = medium_disk,
+                preemptible_tries = preemptible_tries
+        }
+        call BaseRecalibrator {
+            input:
+                input_bam = SortAndFixTags.output_bam,
+                input_bam_index = SortAndFixTags.output_bam_index,
+                recalibration_report_filename = inputs[1] + ".recal_data.table",
+                dbsnp = dbsnp,
+                dbsnp_index = dbsnp_index,
+                known_indels = known_indels,
+                known_indels_index = known_indels_index,
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = small_disk,
+                preemptible_tries = preemptible_tries
+        }
+        call ApplyBQSR {
+            input:
+                input_bam = SortAndFixTags.output_bam,
+                input_bam_index = SortAndFixTags.output_bam_index,
+                output_bam_basename = inputs[1],
+                recalibration_report = BaseRecalibrator.recalibration_report,
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = small_disk,
+                preemptible_tries = preemptible_tries
+        }
+        # to create a nested scatter, use a sub workflow
+        # https://github.com/broadinstitute/cromwell
+        call HaplotypeCaller {
+            input:
+
+        }
     }
 }
 
@@ -253,5 +296,145 @@ task MergeBamAlignment {
     }
     output {
         File output_bam = "${output_bam_basename}.realn.info.bam"
+    }
+}
+
+task SortAndFixTags {
+    File input_bam
+    String output_bam_basename
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx4000m -jar /usr/bin_dir/picard.jar \
+            SortSam \
+            INPUT=${input_bam} \
+            OUTPUT=/dev/stdout \
+            SORT_ORDER="coordinate" \
+            CREATE_INDEX=false \
+            CREATE_MD5_FILE=false | \
+        java -Xmx100m -jar /usr/bin_dir/picard.jar \
+            SetNmAndUqTags \
+            INPUT=/dev/stdin \
+            OUTPUT=${output_bam_basename}.realn.sorted.bam \
+            CREATE_INDEX=true \
+            CREATE_MD5_FILE=false \
+            REFERENCE_SEQUENCE=${ref_fasta};
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "5000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.realn.sorted.bam"
+        File output_bam_index = "${output_bam_basename}.realn.sorted.bai"
+    }
+}
+
+task BaseRecalibrator {
+    File input_bam
+    File input_bam_index
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx4000m -jar /usr/bin_dir/GATK.jar \
+            -T BaseRecalibrator \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${recalibration_report_filename} \
+            -knownSites ${dbsnp} \
+            -knownSites ${known_indels}
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "5000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibration_report = "${output_bam_basename}.recal_data.table"
+    }
+}
+
+task ApplyBQSR {
+    File input_bam
+    File input_bam_index
+    String output_bam_basename
+    File recalibration_report
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2000m -jar /usr/bin_dir/GATK.jar \
+            -T ApplyBQSR \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -O ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -BQSR ${recalibration_report}
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "3 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibrated_bam = ${output_bam_basename}.realn.sorted.bqsr.bam
+    }
+}
+
+task HaplotypeCaller {
+    File input_bam
+    File input_bam_index
+    File interval_list
+    String gvcf_basename
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
+            -T HaplotypeCaller \
+            -R ${ref_fasta} \
+            -o ${gvcf_basename}.vcf.gz \
+            -I ${input_bam} \
+            -L ${interval_list} \
+            -ERC GVCF
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_gvcf = "${gvcf_basename}.vcf.gz"
+        File output_gvcf_index = "${gvcf_basename}.vcf.gz.tbi"
     }
 }
