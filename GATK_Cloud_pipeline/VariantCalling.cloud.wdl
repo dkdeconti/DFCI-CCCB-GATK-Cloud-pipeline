@@ -2,6 +2,7 @@
 ##
 ## Notes
 
+import "subHaplotypeCaller.wdl" as HaplotypeCaller
 
 ##############################################################################
 # Workflow Definition
@@ -12,6 +13,7 @@ workflow RealignBam {
 
     File inputsTSV
     Array[Array[File]] inputs_array = read_tsv(inputsTSV)
+    Array[File] scattered_calling_intervals
 
     File ref_fasta
     File ref_fasta_index
@@ -122,9 +124,15 @@ workflow RealignBam {
         }
         # to create a nested scatter, use a sub workflow
         # https://github.com/broadinstitute/cromwell
-        call HaplotypeCaller {
+        call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
             input:
-
+                input_bam = ApplyBQSR.recalibrated_bam,
+                input_bam_index = ApplyBQSR.,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                ref_dict = ref_dict,
+                gvcf_basename = inputs[1],
+                scattered_calling_intervals = scattered_calling_intervals
         }
     }
 }
@@ -387,7 +395,7 @@ task ApplyBQSR {
 
     command {
         java -Xmx2000m -jar /usr/bin_dir/GATK.jar \
-            -T ApplyBQSR \
+            -T PrintReads \
             -R ${ref_fasta} \
             -I ${input_bam} \
             -O ${output_bam_basename}.realn.sorted.bqsr.bam \
@@ -402,39 +410,6 @@ task ApplyBQSR {
     }
     output {
         File recalibrated_bam = ${output_bam_basename}.realn.sorted.bqsr.bam
-    }
-}
-
-task HaplotypeCaller {
-    File input_bam
-    File input_bam_index
-    File interval_list
-    String gvcf_basename
-    File ref_dict
-    File ref_fasta
-    File ref_fasta_index
-    
-    Int disk_size
-    Int preemptible_tries
-
-    command {
-        java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
-            -T HaplotypeCaller \
-            -R ${ref_fasta} \
-            -o ${gvcf_basename}.vcf.gz \
-            -I ${input_bam} \
-            -L ${interval_list} \
-            -ERC GVCF
-    }
-    runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
-        memory: "10 GB"
-        cpu: "1"
-        disks: "local-disk " + disk_size + " HDD"
-        preemptible: preemptible_tries
-    }
-    output {
-        File output_gvcf = "${gvcf_basename}.vcf.gz"
-        File output_gvcf_index = "${gvcf_basename}.vcf.gz.tbi"
+        File recalibrated_bam_index = ${output_bam_basename}.realn.sorted.bqsr.bai
     }
 }
