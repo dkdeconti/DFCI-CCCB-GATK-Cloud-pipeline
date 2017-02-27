@@ -2,7 +2,7 @@
 # Workflow Definition
 ##############################################################################
 
-#
+# RG info from Broad
 # https://software.broadinstitute.org/gatk/guide/article?id=6472
 
 workflow AlignFASTQs {
