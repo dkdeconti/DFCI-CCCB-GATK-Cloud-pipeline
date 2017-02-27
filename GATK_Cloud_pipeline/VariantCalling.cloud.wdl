@@ -12,8 +12,9 @@ workflow RealignBam {
     #String bin_dir
 
     File inputsTSV
+    File scattered_calling_intervals_list_file
     Array[Array[File]] inputs_array = read_tsv(inputsTSV)
-    Array[File] scattered_calling_intervals
+    Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
 
     File ref_fasta
     File ref_fasta_index
