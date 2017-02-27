@@ -2,7 +2,7 @@
 # Workflow Definition
 ##############################################################################
 
-workflow HaplotypeCaller {
+workflow HaplotypeCallerAndGatherVCFs {
     File input_bam
     File input_bam_index
     File ref_fasta
