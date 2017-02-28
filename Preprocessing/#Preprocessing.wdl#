@@ -7,7 +7,8 @@
 
 workflow AlignFASTQs {
     File inputsTSV
-    Array[Array[File]] inputs_array = read_tsv(inputsTSV)
+    Array[File] inputs_array = 
+    Array[File] inputs_array = read_tsv(inputsTSV)
 
     File ref_fasta
     File ref_fasta_index
