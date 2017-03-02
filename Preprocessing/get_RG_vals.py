@@ -1,12 +1,16 @@
 #! /usr/bin/python
+'''
+Parses gzipped FASTQ file for RG values from read headers.
+'''
 
 import gzip
 import sys
 
 
-def main(sa):
-    sample_name = sa[0]
-    filename = sa[1]
+def print_rg(filename, sample_name):
+    '''
+    Parses first line plus sample_name to print RG values.
+    '''
     with gzip.open(filename, "rU") as handle:
         line = handle.readline()
         arow = line.strip('\n').split()
@@ -28,6 +32,15 @@ def main(sa):
           rglb + "\\tSM:" + rgsm + "\\tCN:" + rgcn + "\\tPU:" + \
           rgpu
     sys.stdout.write(out)
+
+
+def main(sa):
+    '''
+    Parses CLI input
+    '''
+    sample_name = sa[0]
+    filename = sa[1]
+    print_rg(filename, sample_name)
 
 
 if __name__ == "__main__":
