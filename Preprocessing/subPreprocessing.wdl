@@ -4,7 +4,7 @@
 
 workflow Preprocess {
     String sample_name
-    File fastqs_list
+    Array[File] fastqs_list
     String bwa_commands
 
     File ref_fasta
@@ -38,10 +38,10 @@ workflow Preprocess {
                 ref_sa = ref_sa
         }
     }
-    call mergeFastq {
-        input:
-            alignFastq.
-    }
+    #call mergeFastq {
+    #    input:
+    #        alignFastq.
+    #}
 }
 
 
@@ -54,7 +54,7 @@ task getBWARGValues {
     File fastq
     
     command {
-        python /usr/bin_dir/get_RG_vals.py sample_name fastq
+        python /home/ddeconti/scratch/test_splitjoin/get_RG_vals.py sample_name fastq
     }
     
     output {
@@ -78,12 +78,11 @@ task alignFastq {
     File ref_pac
     File ref_sa
 
-    bash_ref_fasta=${ref_fasta}
-
     command {
+        bash_ref_fasta=${ref_fasta}
         ${bwa_commands} -R ${rg} $first_fastq $second_fastq > \
         ${output_bam_basename}.sample_name
-        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+        java -Xmx2500m -jar /home/ddeconti/bin/picard.jar \
             SamFormatConverter \
             I=${output_bam_basename}.sam \
             O=${output_bam_basename}.bam

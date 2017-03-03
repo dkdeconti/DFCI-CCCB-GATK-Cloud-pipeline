@@ -22,7 +22,10 @@ workflow AlignFASTQs {
     File ref_pac
 
     scatter (mapped_inputs in mapped_inputs_array) {
-        File fastqs_list = read_lines(mapped_inputs[1])
+        # Something fishy about this sections
+        # NOt working right
+        # Figure out the right input type
+        Array[File] fastqs_list = read_lines(mapped_inputs[1])
 
         call subPre.Preprocess {
             input:
