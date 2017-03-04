@@ -1,8 +1,8 @@
 ## copyright DFCI CCCB, 2017
 ##
-## Notes
+## 
 
-import "subHaplotypeCaller.wdl" as HaplotypeCaller
+#import "subHaplotypeCaller.cloud.wdl" as HaplotypeCaller
 
 ##############################################################################
 # Workflow Definition
@@ -125,16 +125,16 @@ workflow RealignBam {
         }
         # to create a nested scatter, use a sub workflow
         # https://github.com/broadinstitute/cromwell
-        call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
-            input:
-                input_bam = ApplyBQSR.recalibrated_bam,
-                input_bam_index = ApplyBQSR.,
-                ref_fasta = ref_fasta,
-                ref_fasta_index = ref_fasta_index,
-                ref_dict = ref_dict,
-                gvcf_basename = inputs[1],
-                scattered_calling_intervals = scattered_calling_intervals
-        }
+        #call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
+        #    input:
+        #        input_bam = ApplyBQSR.recalibrated_bam,
+        #        input_bam_index = ApplyBQSR.recalibrated_bam_index,
+        #        ref_fasta = ref_fasta,
+        #        ref_fasta_index = ref_fasta_index,
+        #        ref_dict = ref_dict,
+        #        gvcf_basename = inputs[1],
+        #        scattered_calling_intervals = scattered_calling_intervals
+        #}
     }
 }
 
@@ -350,6 +350,7 @@ task SortAndFixTags {
 task BaseRecalibrator {
     File input_bam
     File input_bam_index
+    String recalibration_report_filename
     File dbsnp
     File dbsnp_index
     File known_indels
@@ -410,7 +411,23 @@ task ApplyBQSR {
         preemptible: preemptible_tries
     }
     output {
-        File recalibrated_bam = ${output_bam_basename}.realn.sorted.bqsr.bam
-        File recalibrated_bam_index = ${output_bam_basename}.realn.sorted.bqsr.bai
+        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
     }
 }
+
+#task GenotypeGVCFs {
+#    Array[File] input_gvcfs
+#    String output_genotyped_gvcf_name
+#    
+#    File ref_dict
+#    File ref_fasta
+#    File ref_fasta_index
+#
+#    Int disk_size
+#    Int preemptible_tries
+#
+#    command {
+#        java -Xmx
+#    }
+#}
