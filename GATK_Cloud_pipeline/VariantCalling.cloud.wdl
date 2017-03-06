@@ -2,15 +2,13 @@
 ##
 ## 
 
-#import "subHaplotypeCaller.cloud.wdl" as HaplotypeCaller
+import "subHaplotypeCaller.cloud.wdl" as HaplotypeCaller
 
 ##############################################################################
 # Workflow Definition
 ##############################################################################
 
-workflow RealignBam {
-    #String bin_dir
-
+workflow RealignAndVariantCalling {
     File inputsTSV
     File scattered_calling_intervals_list_file
     Array[Array[File]] inputs_array = read_tsv(inputsTSV)
@@ -24,6 +22,10 @@ workflow RealignBam {
     File ref_amb
     File ref_ann
     File ref_pac
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
 
     String bwa_commandline="bwa mem -p -v 3 -t 3 $bash_ref_fasta"
 
@@ -40,8 +42,8 @@ workflow RealignBam {
     call GetBwaVersion
 
     scatter (inputs in inputs_array) {
-        #File input_bam = inputs[0]
-        #String output_bam_basename = inputs[1]
+        File input_bam = inputs[0]
+        String output_bam_basename = inputs[1]
 
         call RemoveNonProperPairs {
             input:
@@ -125,16 +127,16 @@ workflow RealignBam {
         }
         # to create a nested scatter, use a sub workflow
         # https://github.com/broadinstitute/cromwell
-        #call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
-        #    input:
-        #        input_bam = ApplyBQSR.recalibrated_bam,
-        #        input_bam_index = ApplyBQSR.recalibrated_bam_index,
-        #        ref_fasta = ref_fasta,
-        #        ref_fasta_index = ref_fasta_index,
-        #        ref_dict = ref_dict,
-        #        gvcf_basename = inputs[1],
-        #        scattered_calling_intervals = scattered_calling_intervals
-        #}
+        call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
+            input:
+                input_bam = ApplyBQSR.recalibrated_bam,
+                input_bam_index = ApplyBQSR.recalibrated_bam_index,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                ref_dict = ref_dict,
+                gvcf_basename = inputs[1],
+                scattered_calling_intervals = scattered_calling_intervals
+        }
     }
 }
 
