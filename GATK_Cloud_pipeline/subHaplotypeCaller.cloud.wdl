@@ -48,7 +48,7 @@ workflow HaplotypeCallerAndGatherVCFs {
 ##############################################################################
 
 task HaplotypeCaller {
-File input_bam
+    File input_bam
     File input_bam_index
     File interval_list
     String gvcf_basename

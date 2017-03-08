@@ -3,6 +3,7 @@ MAINTAINER DSDE <jangofett@broadinstitute.org>
 
 COPY picard.jar /usr/bin_dir/picard.jar
 COPY GenomeAnalysisTK.jar /usr/bin_dir/GATK.jar
+COPY map_bam_to_scatter_intervals.py /usr/bin_dir/map_bam_to_scatter_intervals.py
 RUN apt-get -y update && apt-get install -y samtools bwa
 WORKDIR /usr/workdir
 

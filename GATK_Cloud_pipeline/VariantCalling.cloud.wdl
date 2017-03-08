@@ -2,8 +2,6 @@
 ##
 ## 
 
-import "subHaplotypeCaller.cloud.wdl" as HaplotypeCaller
-
 ##############################################################################
 # Workflow Definition
 ##############################################################################
@@ -136,6 +134,32 @@ workflow RealignAndVariantCalling {
                 ref_dict = ref_dict,
                 gvcf_basename = inputs[1],
                 scattered_calling_intervals = scattered_calling_intervals
+        }
+    }
+
+    call BuildHaplotypeCallerScatterTSV {
+        input:
+            input_bams = ApplyBQSR.recalibrated_bam,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+
+    scatter (inputs in read_tsv(BuildHaplotypeCallerScatterTSV.haplotypecaller_scatter_tsv)) {
+        File input_bam = inputs[0]
+        File scatter_interval = inputs[1]
+        String gvcf_name = inputs[2]
+
+        call HaplotypeCaller {
+            inputs:
+                input_bam = input_bam,
+                input_bam_index = input_bam_index,
+                interval_list = scatter_inteval,
+                gvcf_name = gvcf_name,
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = small_disk,
+                preemptible_tries = preemptible_tries
         }
     }
 }
@@ -417,6 +441,64 @@ task ApplyBQSR {
         File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
     }
 }
+
+task BuildHaplotypeCallerScatterTSV {
+    Array[File] input_bams
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        python /usr/bin_dir/map_bam_to_scatter_intervals.py \
+            ${write_lines(input_bams)}
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "1 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File haplotypecaller_scatter_tsv = "bam_scatter_for_HaplotypeCaller.tsv"
+    }
+}
+
+task HaplotypeCaller {
+    File input_bam
+    File input_bam_index
+    File interval_list
+    String gvcf_name
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
+            -T HaplotypeCaller \
+            -R ${ref_fasta} \
+            -o ${gvcf_name} \
+            -I ${input_bam} \
+            -L ${interval_list} \
+            -ERC GVCF
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_gvcf = "${gvcf_basename}.g.vcf"
+        File output_gvcf_index = "${gvcf_basename}.vcf.tbi"
+    }
+}
+
+
+
 
 #task GenotypeGVCFs {
 #    Array[File] input_gvcfs
