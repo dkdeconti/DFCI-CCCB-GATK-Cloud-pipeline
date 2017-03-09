@@ -123,18 +123,6 @@ workflow RealignAndVariantCalling {
                 disk_size = small_disk,
                 preemptible_tries = preemptible_tries
         }
-        # to create a nested scatter, use a sub workflow
-        # https://github.com/broadinstitute/cromwell
-        call HaplotypeCaller.HaplotypeCallerAndGatherVCFs {
-            input:
-                input_bam = ApplyBQSR.recalibrated_bam,
-                input_bam_index = ApplyBQSR.recalibrated_bam_index,
-                ref_fasta = ref_fasta,
-                ref_fasta_index = ref_fasta_index,
-                ref_dict = ref_dict,
-                gvcf_basename = inputs[1],
-                scattered_calling_intervals = scattered_calling_intervals
-        }
     }
 
     call BuildHaplotypeCallerScatterTSV {
@@ -146,8 +134,9 @@ workflow RealignAndVariantCalling {
 
     scatter (inputs in read_tsv(BuildHaplotypeCallerScatterTSV.haplotypecaller_scatter_tsv)) {
         File input_bam = inputs[0]
-        File scatter_interval = inputs[1]
-        String gvcf_name = inputs[2]
+        File input_bam_index = inputs[1]
+        File scatter_interval = inputs[2]
+        String gvcf_name = inputs[3]
 
         call HaplotypeCaller {
             inputs:
@@ -161,6 +150,10 @@ workflow RealignAndVariantCalling {
                 disk_size = small_disk,
                 preemptible_tries = preemptible_tries
         }
+    }
+
+    call CreateMergeTSVDict {
+        inputs:
     }
 }
 
@@ -497,6 +490,23 @@ task HaplotypeCaller {
     }
 }
 
+task CreateMergeTSVDict {
+    Array[File] vcf_list
+
+    command {
+        python create_vcf_gather_tsv.py ${write_lines(vcf_list)}
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "1 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File merge_cmds_tsv = "bam_scatter_for_HaplotypeCaller.tsv"
+    }
+}
 
 
 
