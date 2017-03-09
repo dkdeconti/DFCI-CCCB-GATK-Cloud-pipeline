@@ -32,10 +32,21 @@ gcloud alpha genomics pipelines run \
   --inputs WORKSPACE=gs://dfci-testgenomes/workspace \
   --inputs OUTPUTS=gs://dfci-testgenomes/outputs
 
+# Call brute single sample workflow with options file
+gcloud alpha genomics pipelines run \
+  --pipeline-file wdl_pipeline.yaml \
+  --zones us-east1-b \
+  --logging gs://dfci-testgenomes/logging \
+  --inputs-from-file WDL=VariantCalling.brute.cloud.wdl  \
+  --inputs-from-file WORKFLOW_INPUTS=VariantCalling.brute.cloud.inputs.json \
+  --inputs-from-file WORKFLOW_OPTIONS=VariantCalling.brute.cloud.options.json \
+  --inputs WORKSPACE=gs://dfci-testgenomes/workspace \
+  --inputs OUTPUTS=gs://dfci-testgenomes/outputs
+
 # --inputs-from-file WORKFLOW_OPTIONS=RealignBam.cloud.options.json \
 
 # Output to track the pipeline                                                        
-Running [operations/EPiO962qKxjoioiLx9atiFMggJ2TgoYcKg9wcm9kdWN0aW9uUXVldWU].  
+Running [operations/EPSv9aWrKxi79p_FsLafqJkBIICdk4KGHCoPcHJvZHVjdGlvblF1ZXVl].
 
 # Check the status of the pipeline
 gcloud alpha genomics operations describe operation-id \

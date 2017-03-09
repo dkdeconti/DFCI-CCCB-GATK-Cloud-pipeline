@@ -139,7 +139,7 @@ workflow RealignAndVariantCalling {
         String gvcf_name = inputs[3]
 
         call HaplotypeCaller {
-            inputs:
+            input:
                 input_bam = input_bam,
                 input_bam_index = input_bam_index,
                 interval_list = scatter_inteval,
@@ -152,9 +152,9 @@ workflow RealignAndVariantCalling {
         }
     }
 
-    call CreateMergeTSVDict {
-        inputs:
-    }
+    #call CreateMergeTSVDict {
+    #    inputs:
+    #}
 }
 
 ##############################################################################
@@ -490,23 +490,23 @@ task HaplotypeCaller {
     }
 }
 
-task CreateMergeTSVDict {
-    Array[File] vcf_list
-
-    command {
-        python create_vcf_gather_tsv.py ${write_lines(vcf_list)}
-    }
-    runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
-        memory: "1 GB"
-        cpu: "1"
-        disks: "local-disk " + disk_size + " HDD"
-        preemptible: preemptible_tries
-    }
-    output {
-        File merge_cmds_tsv = "bam_scatter_for_HaplotypeCaller.tsv"
-    }
-}
+#task CreateMergeTSVDict {
+#    Array[File] vcf_list
+#
+#    command {
+#        python create_vcf_gather_tsv.py ${write_lines(vcf_list)}
+#    }
+#    runtime {
+#        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+#        memory: "1 GB"
+#        cpu: "1"
+#        disks: "local-disk " + disk_size + " HDD"
+#        preemptible: preemptible_tries
+#    }
+#    output {
+#        File merge_cmds_tsv = "bam_scatter_for_HaplotypeCaller.tsv"
+#    }
+#}
 
 
 
