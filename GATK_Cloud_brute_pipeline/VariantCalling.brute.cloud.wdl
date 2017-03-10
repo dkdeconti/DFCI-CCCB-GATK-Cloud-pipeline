@@ -119,7 +119,7 @@ workflow RealignAndVariantCalling {
             input:
                 input_bam = ApplyBQSR.recalibrated_bam,
                 input_bam_index = ApplyBQSR.recalibrated_bam_index,
-                interval_list = scatter_inteval,
+                interval_list = scatter_interval,
                 gvcf_name = output_basename,
                 ref_dict = ref_dict,
                 ref_fasta = ref_fasta,
@@ -427,7 +427,9 @@ task HaplotypeCaller {
             -o ${gvcf_name} \
             -I ${input_bam} \
             -L ${interval_list} \
-            --emitRefConfidence GVCF
+            --emitRefConfidence GVCF \
+            -variant_index_type LINEAR \
+            -variant_index_parameter 128000
     }
     runtime {
         docker: "gcr.io/dfci-cccb/basic-seq-tools"
@@ -437,7 +439,7 @@ task HaplotypeCaller {
         preemptible: preemptible_tries
     }
     output {
-        File output_gvcf = "${gvcf_basename}.g.vcf"
-        File output_gvcf_index = "${gvcf_basename}.vcf.tbi"
+        File output_gvcf = "${gvcf_name}.g.vcf"
+        File output_gvcf_index = "${gvcf_name}.vcf.tbi"
     }
 }
