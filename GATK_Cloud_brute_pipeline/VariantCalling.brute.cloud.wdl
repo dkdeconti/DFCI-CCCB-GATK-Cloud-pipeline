@@ -424,7 +424,7 @@ task HaplotypeCaller {
         java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
             -T HaplotypeCaller \
             -R ${ref_fasta} \
-            -o ${gvcf_name} \
+            -o ${gvcf_name}.g.gvcf \
             -I ${input_bam} \
             -L ${interval_list} \
             --emitRefConfidence GVCF \
@@ -440,6 +440,6 @@ task HaplotypeCaller {
     }
     output {
         File output_gvcf = "${gvcf_name}.g.vcf"
-        File output_gvcf_index = "${gvcf_name}.vcf.tbi"
+        File output_gvcf_index = "${gvcf_name}.g.vcf.tbi"
     }
 }
