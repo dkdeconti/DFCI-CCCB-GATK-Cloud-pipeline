@@ -440,6 +440,6 @@ task HaplotypeCaller {
     }
     output {
         File output_gvcf = "${gvcf_name}.g.vcf"
-        File output_gvcf_index = "${gvcf_name}.g.vcf.tbi"
+        #File output_gvcf_index = "${gvcf_name}.g.vcf.tbi"
     }
 }
