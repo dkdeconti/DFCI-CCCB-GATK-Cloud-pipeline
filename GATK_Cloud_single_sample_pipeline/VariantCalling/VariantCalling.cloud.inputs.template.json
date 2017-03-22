@@ -1,5 +1,5 @@
 {
-  "RealignAndVariantCalling.input_bam": "INPUT_BAM_INJECTION",
+  "RealignAndVariantCalling.input_bam": "BAM_INJECTION",
   "RealignAndVariantCalling.output_basename": "INPUT_BASENAME_INJECTION",
   "RealignAndVariantCalling.ref_fasta": "gs://dfci-testgenomes/chr20.fa",
   "RealignAndVariantCalling.ref_fasta_index": "gs://dfci-testgenomes/chr20.fa.fai",

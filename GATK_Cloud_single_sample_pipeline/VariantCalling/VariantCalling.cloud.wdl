@@ -128,6 +128,10 @@ workflow RealignAndVariantCalling {
                 preemptible_tries = preemptible_tries
         }
     }
+    call MergeVCFs {
+        input:
+
+    }
 }
 
 ##############################################################################
@@ -441,5 +445,34 @@ task HaplotypeCaller {
     output {
         File output_gvcf = "${gvcf_name}.g.vcf"
         #File output_gvcf_index = "${gvcf_name}.g.vcf.tbi"
+    }
+}
+
+task MergeVCFs {
+    Array[File] input_vcfs
+    String output_vcf_name
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx 3000M -cp /usr/bin_dir/GATK.jar \
+            org.broadinstitute.gatk.tools.CatVariants \
+            -R ${ref_fasta} \
+            -V ${sep=' -V ' input_vcfs} \
+            -out ${output_vcf_name}.g.vcf \
+            --assumeSorted
+    }
+    runtime {
+        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        memory: "4 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_vcf = "${output_vcf_name}.g.vcf"
     }
 }
