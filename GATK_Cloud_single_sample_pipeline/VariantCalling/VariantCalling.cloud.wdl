@@ -130,7 +130,13 @@ workflow RealignAndVariantCalling {
     }
     call MergeVCFs {
         input:
-
+            input_vcfs = HaplotypeCaller.output_gvcf,
+            output_vcf_name = output_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
     }
 }
 
