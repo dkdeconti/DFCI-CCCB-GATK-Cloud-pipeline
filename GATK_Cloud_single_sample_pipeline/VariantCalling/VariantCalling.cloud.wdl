@@ -434,7 +434,7 @@ task HaplotypeCaller {
         java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
             -T HaplotypeCaller \
             -R ${ref_fasta} \
-            -o ${gvcf_name}.g.gvcf \
+            -o ${gvcf_name}.g.vcf \
             -I ${input_bam} \
             -L ${interval_list} \
             --emitRefConfidence GVCF \
@@ -464,7 +464,7 @@ task MergeVCFs {
     Int preemptible_tries
 
     command {
-        java -Xmx 3000M -cp /usr/bin_dir/GATK.jar \
+        java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
             org.broadinstitute.gatk.tools.CatVariants \
             -R ${ref_fasta} \
             -V ${sep=' -V ' input_vcfs} \

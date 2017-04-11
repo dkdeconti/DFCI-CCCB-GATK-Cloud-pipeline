@@ -9,6 +9,7 @@
   "RealignAndVariantCalling.ref_bwt": "gs://dfci-testgenomes/chr20.fa.bwt",
   "RealignAndVariantCalling.ref_pac": "gs://dfci-testgenomes/chr20.fa.pac",
   "RealignAndVariantCalling.ref_sa": "gs://dfci-testgenomes/chr20.fa.sa",
+  "RealignAndVariantCalling.scattered_calling_intervals_list_file": "gs://dfci-testgenomes/1000Genome.Phase3.20130108.exome.chr20.targets.list",
   "RealignAndVariantCalling.dbsnp": "gs://dfci-testgenomes/dbsnp.hg19.chr20.vcf.gz",
   "RealignAndVariantCalling.dbsnp_index": "gs://dfci-testgenomes/dbsnp.hg19.chr20.vcf.gz.tbi",
   "RealignAndVariantCalling.known_indels": "gs://dfci-testgenomes/Mills_and_1000G_gold_standard.indels.hg19.chr20.vcf.gz",
