@@ -247,11 +247,10 @@ task VEPAnnotate {
     Int preemptible_tries
 
     command {
-        perl /usr/bin_dir/vep \
+        /home/vep/src/ensembl-vep/vep \
             --cache \
-            --dir /usr/bin_dir/.vep \
+            --dir /home/vep/src/ensembl-vep/.vep \
             --species homo_sapiens \
-            --cache_version 75 \
             --stats_file vcf_stats.vep.htm \
             --offline \
             --everything \
@@ -259,13 +258,13 @@ task VEPAnnotate {
             --vcf \
             --input_file ${input_vcf} \
             --output_file ${output_vcf_name}.vep.dn.vqsr.gt.g.vcf \
+            --plugin LoF \
             --custom ${exac_syn},syn_z,bed,overlap,0 \
             --custom ${exac_mis},mis_z,bed,overlap,0 \
-            --custom ${exac_lof},lof_z,bed,overlap,0 \
-            --plugin LoF > vep.log 2>&1
+            --custom ${exac_lof},lof_z,bed,overlap,0
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/dfci-cccb/vep"
         memory: "3500 MB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
