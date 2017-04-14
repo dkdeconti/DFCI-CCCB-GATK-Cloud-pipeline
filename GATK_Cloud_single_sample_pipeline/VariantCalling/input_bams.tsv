@@ -1,2 +1,2 @@
-gs://dfci-testgenomes/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam	HG00096
-gs://dfci-testgenomes/HG00097.chrom20.ILLUMINA.bwa.GBR.exome.20130415.bam	HG00097
+gs://dfci-cccb-pipeline-testing/HG00119.alt_bwamem_GRCh38DH.20150826.GBR.exome.downsampled.bam	HG00119
+gs://dfci-cccb-pipeline-testing/HG00121.alt_bwamem_GRCh38DH.20150826.GBR.exome.downsampled.bam	HG00121

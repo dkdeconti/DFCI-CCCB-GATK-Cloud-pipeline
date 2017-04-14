@@ -1,6 +1,6 @@
 # inputs file
 INPUTS_TSV=$1
-GATK_GOOGLE_DIR="dfci-testgenomes"
+GATK_GOOGLE_DIR="dfci-cccb-pipeline-testing"
 
 while read line; do
     cp VariantCalling.cloud.inputs.template.json VariantCalling.cloud.inputs.json
@@ -11,10 +11,10 @@ while read line; do
     gcloud alpha genomics pipelines run \
         --pipeline-file wdl_pipeline.yaml \
         --zones us-east1-b \
-        --logging gs://dfci-testgenomes/logging \
+        --logging gs://dfci-cccb-pipeline-testing/logging \
         --inputs-from-file WDL=VariantCalling.cloud.wdl  \
         --inputs-from-file WORKFLOW_INPUTS=VariantCalling.cloud.inputs.json \
         --inputs-from-file WORKFLOW_OPTIONS=VariantCalling.cloud.options.json \
-        --inputs WORKSPACE=gs://dfci-testgenomes/workspace \
-        --inputs OUTPUTS=gs://dfci-testgenomes/outputs
+        --inputs WORKSPACE=gs://dfci-cccb-pipeline-testing/workspace \
+        --inputs OUTPUTS=gs://dfci-cccb-pipeline-testing/outputs
 done < $INPUTS_TSV
