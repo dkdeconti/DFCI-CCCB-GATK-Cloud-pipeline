@@ -151,7 +151,7 @@ task GetBwaVersion {
         sed 's/Version: //'
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "1 GB"
     }
     output {
@@ -172,7 +172,7 @@ task RemoveNonProperPairs {
         ${input_bam}
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "2 GB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -197,7 +197,7 @@ task UnmapBam {
             O=${output_bam_basename}.proper-pairs.unmapped.bam
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "3 GB"
         cpu: "2"
         disks: "local-disk " + disk_size + " HDD"
@@ -247,7 +247,7 @@ task SamToFastqAndBwaMem {
             O=${output_bam_basename}.realn.bam
     >>>
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         cpu: "3"
         memory: "14 GB"
         cpu: "16"
@@ -299,7 +299,7 @@ task MergeBamAlignment {
             UNMAP_CONTAMINANT_READS=true
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "3500 MB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -337,7 +337,7 @@ task SortAndFixTags {
             REFERENCE_SEQUENCE=${ref_fasta};
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "5000 MB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -375,7 +375,7 @@ task BaseRecalibrator {
             -knownSites ${known_indels}
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "5000 MB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -407,7 +407,7 @@ task ApplyBQSR {
             -BQSR ${recalibration_report}
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "3 GB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -442,7 +442,7 @@ task HaplotypeCaller {
             -variant_index_parameter 128000
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "10 GB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
@@ -472,7 +472,7 @@ task MergeVCFs {
             --assumeSorted
     }
     runtime {
-        docker: "gcr.io/dfci-cccb/basic-seq-tools"
+        docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
         memory: "4 GB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"

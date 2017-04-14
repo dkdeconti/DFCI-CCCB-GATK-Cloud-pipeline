@@ -1,3 +1,4 @@
+#!/bin/bash
 # inputs file
 INPUTS_TSV=$1
 GATK_GOOGLE_DIR="dfci-cccb-pipeline-testing"
