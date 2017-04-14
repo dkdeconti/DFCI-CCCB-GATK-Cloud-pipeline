@@ -1,5 +1,5 @@
 FROM broadinstitute/java-baseimage
-MAINTAINER DSDE <jangofett@broadinstitute.org>
+MAINTAINER DFCI-CCCB <deconti@jimmy.harvard.edu>
 
 COPY picard.jar /usr/bin_dir/picard.jar
 COPY GenomeAnalysisTK.jar /usr/bin_dir/GATK.jar
