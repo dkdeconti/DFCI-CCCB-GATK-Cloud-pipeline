@@ -1,3 +1,4 @@
+First run:
 Running [operations/ELjbzdS2Kxjn48GRteOu0bYBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].
 Running [operations/EKvjzdS2KxjqksbNx4jD1Q4gxZrg-7cZKg9wcm9kdWN0aW9uUXVldWU].
 # Check the status of the pipeline
@@ -6,3 +7,15 @@ gcloud alpha genomics operations describe operation-id \
 
 gcloud alpha genomics operations describe ELjbzdS2Kxjn48GRteOu0bYBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl --format='yaml(done, error, metadata.events)'
 gcloud alpha genomics operations describe  --format='yaml(done, error, metadata.events)'
+
+First run cost:
+
+# Failed due to out of heap space on Picard SortSam
+
+##############################################################################
+Second Run:
+Running [operations/EOeg_Oe2KxiV__vk6qSrpa8BIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].                                                                                       
+Running [operations/EM-o_Oe2KxjlybKuxqK9q6QBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].
+
+gcloud alpha genomics operations describe EOeg_Oe2KxiV__vk6qSrpa8BIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl --format='yaml(done, error, metadata.events)'
+gcloud alpha genomics operations describe EM-o_Oe2KxjlybKuxqK9q6QBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl --format='yaml(done, error, metadata.events)'

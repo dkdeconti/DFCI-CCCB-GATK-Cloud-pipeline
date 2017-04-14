@@ -138,6 +138,12 @@ workflow RealignAndVariantCalling {
             disk_size = small_disk,
             preemptible_tries = preemptible_tries
     }
+
+    output {
+        ApplyBQSR.recalibrated_bam
+        ApplyBQSR.recalibrated_bam_index
+        MergeVCFs.output_vcf
+    }
 }
 
 ##############################################################################
@@ -321,14 +327,14 @@ task SortAndFixTags {
     Int preemptible_tries
 
     command {
-        java -Xmx4000m -jar /usr/bin_dir/picard.jar \
+        java -Xmx8000m -jar /usr/bin_dir/picard.jar \
             SortSam \
             INPUT=${input_bam} \
             OUTPUT=/dev/stdout \
             SORT_ORDER="coordinate" \
             CREATE_INDEX=false \
             CREATE_MD5_FILE=false | \
-        java -Xmx100m -jar /usr/bin_dir/picard.jar \
+        java -Xmx1000m -jar /usr/bin_dir/picard.jar \
             SetNmAndUqTags \
             INPUT=/dev/stdin \
             OUTPUT=${output_bam_basename}.realn.sorted.bam \
@@ -338,7 +344,7 @@ task SortAndFixTags {
     }
     runtime {
         docker: "gcr.io/cccb-sandbox-164319/basic-seq-tools"
-        memory: "5000 MB"
+        memory: "10000 MB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
         preemptible: preemptible_tries
