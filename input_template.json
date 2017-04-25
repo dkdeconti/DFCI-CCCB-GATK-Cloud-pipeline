@@ -1,0 +1,21 @@
+{
+  "RealignAndVariantCalling.input_bam": "$BAM_INJECTION",
+  "RealignAndVariantCalling.output_basename": "$INPUT_BASENAME_INJECTION",
+  "RealignAndVariantCalling.ref_fasta": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta",
+  "RealignAndVariantCalling.ref_fasta_index": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.fai",
+  "RealignAndVariantCalling.ref_dict": "gs://$BUCKET_INJECTION/ucsc.hg19.dict",
+  "RealignAndVariantCalling.ref_amb": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.amb",
+  "RealignAndVariantCalling.ref_ann": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.ann",
+  "RealignAndVariantCalling.ref_bwt": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.bwt",
+  "RealignAndVariantCalling.ref_pac": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.pac",
+  "RealignAndVariantCalling.ref_sa": "gs://$BUCKET_INJECTION/ucsc.hg19.fasta.sa",
+  "RealignAndVariantCalling.scattered_calling_intervals_list_file": "gs://$BUCKET_INJECTION/1000Genome.Phase3.20130108.exome.targets.list",
+  "RealignAndVariantCalling.dbsnp": "gs://$BUCKET_INJECTION/dbsnp_137.hg19.vcf",
+  "RealignAndVariantCalling.dbsnp_index": "gs://$BUCKET_INJECTION/dbsnp.hg19.vcf.idx",
+  "RealignAndVariantCalling.known_indels": "gs://$BUCKET_INJECTION/Mills_and_1000G_gold_standard.indels.hg19.vcf",
+  "RealignAndVariantCalling.known_indels_index": "gs://$BUCKET_INJECTION/Mills_and_1000G_gold_standard.indels.hg19.vcf.idx",
+  "RealignAndVariantCalling.preemptible_tries": "3",
+  "RealignAndVariantCalling.large_disk": "400",
+  "RealignAndVariantCalling.medium_disk": "300",
+  "RealignAndVariantCalling.small_disk": "200"
+}
