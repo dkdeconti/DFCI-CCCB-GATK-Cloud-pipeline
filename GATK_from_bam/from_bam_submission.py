@@ -2,6 +2,7 @@ import argparse
 import ConfigParser
 import random
 import string
+import subprocess
 from string import Template
 
 
@@ -21,26 +22,28 @@ def create_inputs_json(template_json, bucket, sample_name, bam_file):
     return inputs_filename
 
 
-def create_sub_script(sample_name, template_sub, bucket, wdl_file, inputs_file, 
+def create_sub_script(sample_name, template_sub, bucket, wdl_file, inputs_file,
                       options_file, yaml_file):
     '''
     Inject variables into template submission script.
     '''
-    d = {"BUCKET_INJECTION": bucket,
-         "WDL_FILE": wdl_file,
-         "INPUTS_FILE": inputs_file,
-         "OPTIONS_FILE": options_file,
-         "YAML_FILE": yaml_file}
-    with open(template_sub) as filein: s = Template(filein.read())
+    injects = {"BUCKET_INJECTION": bucket,
+               "WDL_FILE": wdl_file,
+               "INPUTS_FILE": inputs_file,
+               "OPTIONS_FILE": options_file,
+               "YAML_FILE": yaml_file}
+    with open(template_sub) as filein:
+        template_string = Template(filein.read())
     bar_code = ''.join(random.SystemRandom().choice(string.ascii_letters +
                                                     string.digits)
                        for _ in range(10))
     sub_filename = '.'.join([sample_name, bar_code, "submission.sh"])
-    with open(sub_filename, 'w') as fileout: fileout.write(s.substitute(d))
+    with open(sub_filename, 'w') as fileout:
+        fileout.write(template_string.substitute(injects))
     return sub_filename
-    
 
-def submit_variant_calling(sample_name, bam_file, bucket, template_json, 
+
+def submit_variant_calling(sample_name, bam_file, bucket, template_json,
                            submission_file, wdl_file, options_file, yaml_file):
     '''
     Submission script for individual bam.
@@ -50,9 +53,13 @@ def submit_variant_calling(sample_name, bam_file, bucket, template_json,
     sub_script = create_sub_script(sample_name, submission_file, bucket,
                                    wdl_file, inputs_filename, options_file,
                                    yaml_file)
+    with open(sub_script) as filein:
+        script = filein.read()
+    subprocess.Popen(script, shell=True)
+    # do something about retrieving the stdout
     #with open(sub_script) as filein: print filein.read()
     return sub_script
-    
+
 
 def map_bam_tsv(tsv):
     '''
