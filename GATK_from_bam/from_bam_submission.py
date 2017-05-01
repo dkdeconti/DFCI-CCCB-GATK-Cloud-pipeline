@@ -1,5 +1,6 @@
 import argparse
 import ConfigParser
+import os
 import random
 import string
 import subprocess
@@ -61,7 +62,11 @@ def create_sub_script(sample_name, bucket, inputs, config):
                                           'default_options'),
                "YAML_FILE": config.get('default_templates',
                                        'reference_bucket') +
-                            config.get('default_templates', 'default_yaml')}
+                            config.get('default_templates', 'default_yaml')
+              }
+    #           "YAML_FILE": os.path.join(os.path.abspath(__file__),
+    #                                     config.get('default_templates',
+    #                                                'default_yaml'))  
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
     bar_code = inputs.strip('.inputs.json').split('.')[-1]
@@ -78,13 +83,13 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     inputs = create_inputs_json(sample_name, bam_file, genome, probe, config)
     sub_script = create_sub_script(sample_name, bucket, inputs, config)
     with open(sub_script) as filein:
-        script = filein.read()
-    #p = subprocess.Popen(script, shell=True,
-    #                     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #stdout, stderr = p.communicate()
-    print script
-    return script
-    #return stdout
+        script = filein.read().replace('\n', '').replace('\\', '')
+    p = subprocess.Popen(script, shell=True,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+    # stderr return 'Running ....' info
+    #[('', 'Running [operations/ENTKy7C8KxjOlOjrhajz69EBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n'), ('', 'Running [operations/EO7Ty7C8KxjZm5-LrPDg-4YBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n')]
+    return (stdout, stderr)
 
 
 def map_bam_tsv(tsv):
