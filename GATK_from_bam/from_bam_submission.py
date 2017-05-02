@@ -4,7 +4,9 @@ import os
 import random
 import string
 import subprocess
+import sys
 import time
+import yaml
 from string import Template
 
 
@@ -61,9 +63,11 @@ def create_sub_script(sample_name, bucket, inputs, config):
                                           'reference_bucket') +
                                config.get('default_templates',
                                           'default_options'),
-               "YAML_FILE": config.get('default_templates',
-                                       'reference_bucket') +
-                            config.get('default_templates', 'default_yaml')
+               "YAML_FILE": os.path.join(os.path.dirname(__file__),
+                                         "default.yaml")
+               #"YAML_FILE": config.get('default_templates',
+               #                        'reference_bucket') +
+               #             config.get('default_templates', 'default_yaml')
               }
     #           "YAML_FILE": os.path.join(os.path.abspath(__file__),
     #                                     config.get('default_templates',
@@ -88,9 +92,11 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     proc = subprocess.Popen(script, shell=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     _, stderr = proc.communicate()
-    code = stderr.split('/')[0].strip('].\n')
-    # stderr return 'Running ....' info
-    #[('', 'Running [operations/ENTKy7C8KxjOlOjrhajz69EBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n'), ('', 'Running [operations/EO7Ty7C8KxjZm5-LrPDg-4YBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n')]
+    code = stderr.split('/')[1].strip('].\n')
+    sys.stderr.write(code + '\n')
+    barcode = inputs.strip('.inputs.json').split('.')[-1]
+    with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
+        fileout.write(code)
     return code
 
 
@@ -109,8 +115,11 @@ def wait_until_complete(codes):
     Idles until all google compute pipelines/instances are complete.
     '''
     keep_waiting = True
+    errors = {}
     while keep_waiting:
-        time.sleep(3600) # Waits 1 hour
+        sys.stderr.write('.')
+        #time.sleep(3600) # Waits 1 hour
+        time.sleep(300) # Waits 5 minutes
         for code in codes:
             script = ' '.join(["gcloud alpha genomics operations describe",
                                code,
@@ -118,11 +127,16 @@ def wait_until_complete(codes):
             proc = subprocess.Popen(script, shell=True,
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            done_status = stderr
+            stdout, _ = proc.communicate()
+            out_map = yaml.safe_load(stdout)
+            done_status = out_map["done"]
+            errors[code] = out_map["error"]
             if done_status:
+                keep_waiting = False
+            else:
                 keep_waiting = True
-
+    sys.stderr.write('\n')
+    return errors
 
 def main():
     '''
@@ -148,10 +162,15 @@ def main():
     config.read(args.config)
     # Work
     #samples = map_bam_tsv(args.bamtsv)
+    sys.stderr.write("Submitting jobs...\n")
     codes = [submit_variant_calling(sample_name, bam, args.bucket, args.genome,
                                     args.probe, config)
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
-    wait_until_complete(codes)
+    sys.stderr.write("Done submitting jobs.\n")
+    sys.stderr.write("Waiting for job completion.")
+    errors = wait_until_complete(codes)
+    sys.stderr.write("Done waiting for job completion.\n")
+    print errors
 
 
 if __name__ == "__main__":

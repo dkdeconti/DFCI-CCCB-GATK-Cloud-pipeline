@@ -116,8 +116,7 @@ workflow RealignAndVariantCalling {
             preemptible_tries = preemptible_tries
     }
     scatter (scatter_interval in scattered_calling_intervals) {
-        full_scatter_interval = "${scattered_calling_intervals_bucket}" + 
-                                "${scatter_interval}"
+        File full_scatter_interval = "${scattered_calling_intervals_bucket}" + "${scatter_interval}"
         call HaplotypeCaller {
             input:
                 input_bam = ApplyBQSR.recalibrated_bam,
