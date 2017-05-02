@@ -4,6 +4,7 @@ import os
 import random
 import string
 import subprocess
+import time
 from string import Template
 
 
@@ -66,7 +67,7 @@ def create_sub_script(sample_name, bucket, inputs, config):
               }
     #           "YAML_FILE": os.path.join(os.path.abspath(__file__),
     #                                     config.get('default_templates',
-    #                                                'default_yaml'))  
+    #                                                'default_yaml'))
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
     bar_code = inputs.strip('.inputs.json').split('.')[-1]
@@ -84,12 +85,13 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     sub_script = create_sub_script(sample_name, bucket, inputs, config)
     with open(sub_script) as filein:
         script = filein.read().replace('\n', '').replace('\\', '')
-    p = subprocess.Popen(script, shell=True,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = p.communicate()
+    proc = subprocess.Popen(script, shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, stderr = proc.communicate()
+    code = stderr.split('/')[0].strip('].\n')
     # stderr return 'Running ....' info
     #[('', 'Running [operations/ENTKy7C8KxjOlOjrhajz69EBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n'), ('', 'Running [operations/EO7Ty7C8KxjZm5-LrPDg-4YBIMWa4Pu3GSoPcHJvZHVjdGlvblF1ZXVl].\n')]
-    return (stdout, stderr)
+    return code
 
 
 def map_bam_tsv(tsv):
@@ -100,6 +102,26 @@ def map_bam_tsv(tsv):
         return dict(s.split('\t')
                     for s in filein.read().split('\n')
                     if len(s.split('\t')) == 2)
+
+
+def wait_until_complete(codes):
+    '''
+    Idles until all google compute pipelines/instances are complete.
+    '''
+    keep_waiting = True
+    while keep_waiting:
+        time.sleep(3600) # Waits 1 hour
+        for code in codes:
+            script = ' '.join(["gcloud alpha genomics operations describe",
+                               code,
+                               "--format='yaml(done, error, metadata.events)'"])
+            proc = subprocess.Popen(script, shell=True,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            done_status = stderr
+            if done_status:
+                keep_waiting = True
 
 
 def main():
@@ -129,7 +151,7 @@ def main():
     codes = [submit_variant_calling(sample_name, bam, args.bucket, args.genome,
                                     args.probe, config)
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
-    print codes
+    wait_until_complete(codes)
 
 
 if __name__ == "__main__":
