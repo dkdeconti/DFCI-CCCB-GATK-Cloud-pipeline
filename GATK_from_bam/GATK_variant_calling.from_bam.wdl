@@ -6,7 +6,6 @@ workflow RealignAndVariantCalling {
     File input_bam
     String output_basename
     File scattered_calling_intervals_list_file
-    String scattered_calling_intervals_bucket
     Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
 
     File ref_fasta
@@ -116,12 +115,11 @@ workflow RealignAndVariantCalling {
             preemptible_tries = preemptible_tries
     }
     scatter (scatter_interval in scattered_calling_intervals) {
-        File full_scatter_interval = "${scattered_calling_intervals_bucket}" + "${scatter_interval}"
         call HaplotypeCaller {
             input:
                 input_bam = ApplyBQSR.recalibrated_bam,
                 input_bam_index = ApplyBQSR.recalibrated_bam_index,
-                interval_list = full_scatter_interval,
+                interval_list = scatter_interval,
                 gvcf_name = output_basename,
                 ref_dict = ref_dict,
                 ref_fasta = ref_fasta,

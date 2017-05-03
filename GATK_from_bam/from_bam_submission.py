@@ -28,10 +28,6 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
                                        'bucket') +
                             config.get('hg19_1000G_phase3_exome_probe',
                                        'scattered_probe_list'),
-         "PROBE_BUCKET_INJECTION": config.get('default_templates',
-                                              'reference_bucket') +
-                                   config.get('hg19_1000G_phase3_exome_probe',
-                                              'bucket'),
          "REF_FASTA": config.get(genome, 'ref_fasta'),
          "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
          "REF_DICT": config.get(genome, 'ref_dict'),
@@ -55,26 +51,26 @@ def create_sub_script(sample_name, bucket, inputs, config):
     '''
     Inject variables into template submission script.
     '''
+    bar_code = inputs.strip('.inputs.json').split('.')[-1]
+    if config.get('default_templates', 'template_loc') == 'False':
+        ref_loc = os.path.dirname(os.path.realpath(__file__))
+    else:
+        ref_loc = config.get('default_templates', 'reference_loc')
     injects = {"BUCKET_INJECTION": bucket,
-               "WDL_FILE": config.get('default_templates', 'reference_bucket') +
-                           config.get('default_templates', 'default_wdl'),
+               "WDL_FILE": os.path.join(ref_loc,
+                                        config.get('default_templates',
+                                                   'default_wdl')),
                "INPUTS_FILE": inputs,
-               "OPTIONS_FILE": config.get('default_templates',
-                                          'reference_bucket') +
-                               config.get('default_templates',
-                                          'default_options'),
-               "YAML_FILE": os.path.join(os.path.dirname(__file__),
-                                         "default.yaml")
-               #"YAML_FILE": config.get('default_templates',
-               #                        'reference_bucket') +
-               #             config.get('default_templates', 'default_yaml')
+               "OPTIONS_FILE": os.path.join(ref_loc,
+                                            config.get('default_templates',
+                                                       'default_options')),
+               "OUTPUT_FOLDER": '-'.join([sample_name, bar_code, "wdl_output"]),
+               "YAML_FILE": os.path.join(ref_loc,
+                                         config.get('default_templates',
+                                                    'default_yaml'))
               }
-    #           "YAML_FILE": os.path.join(os.path.abspath(__file__),
-    #                                     config.get('default_templates',
-    #                                                'default_yaml'))
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
-    bar_code = inputs.strip('.inputs.json').split('.')[-1]
     sub_filename = '.'.join([sample_name, bar_code, "submission.sh"])
     with open(sub_filename, 'w') as fileout:
         fileout.write(template_string.substitute(injects))
@@ -89,15 +85,15 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     sub_script = create_sub_script(sample_name, bucket, inputs, config)
     with open(sub_script) as filein:
         script = filein.read().replace('\n', '').replace('\\', '')
-    proc = subprocess.Popen(script, shell=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _, stderr = proc.communicate()
-    code = stderr.split('/')[1].strip('].\n')
-    sys.stderr.write(code + '\n')
-    barcode = inputs.strip('.inputs.json').split('.')[-1]
-    with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
-        fileout.write(code)
-    return code
+    #proc = subprocess.Popen(script, shell=True,
+    #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #_, stderr = proc.communicate()
+    #code = stderr.split('/')[1].strip('].\n')
+    #sys.stderr.write(code + '\n')
+    #barcode = inputs.strip('.inputs.json').split('.')[-1]
+    #with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
+    #    fileout.write(code)
+    #return code
 
 
 def map_bam_tsv(tsv):
@@ -154,7 +150,9 @@ def main():
                         help="genome to analyze against [hg19]")
     parser.add_argument("--probe", metavar="PROBE_TYPE",
                         help="probe type for scatter-gather")
-    parser.set_defaults(config="config", genome="hg19",
+    parser.set_defaults(config=os.path.join(os.path.dirname(__file__),
+                                            "config"),
+                        genome="hg19",
                         probe="hg19_1000G_phase3_exome_probe")
     args = parser.parse_args()
     # Set up config
@@ -168,9 +166,9 @@ def main():
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
     sys.stderr.write("Done submitting jobs.\n")
     sys.stderr.write("Waiting for job completion.")
-    errors = wait_until_complete(codes)
+    #errors = wait_until_complete(codes)
     sys.stderr.write("Done waiting for job completion.\n")
-    print errors
+    #print errors
 
 
 if __name__ == "__main__":

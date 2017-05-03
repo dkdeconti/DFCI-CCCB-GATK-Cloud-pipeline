@@ -10,7 +10,6 @@
   "RealignAndVariantCalling.ref_pac": "$BUCKET_INJECTION$REF_FASTA_PAC",
   "RealignAndVariantCalling.ref_sa": "$BUCKET_INJECTION$REF_FASTA_SA",
   "RealignAndVariantCalling.scattered_calling_intervals_list_file": "$PROBE_INJECTION",
-  "RealignAndVariantCalling.scattered_calling_intervals_bucket": "$PROBE_BUCKET_INJECTION",
   "RealignAndVariantCalling.dbsnp": "$BUCKET_INJECTION$DBSNP",
   "RealignAndVariantCalling.dbsnp_index": "$BUCKET_INJECTION$DBSNP_INDEX",
   "RealignAndVariantCalling.known_indels": "$BUCKET_INJECTION$KNOWN_INDELS",

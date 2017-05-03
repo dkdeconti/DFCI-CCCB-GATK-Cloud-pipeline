@@ -1,10 +1,11 @@
 [default_templates]
 reference_bucket = gs://dfci-cccb-pipeline-testing/
+template_loc = False
 default_inputs = input_template.json
 default_submission = submission_template.sh
-default_yaml = default_templates/GATK_variant_discovery_from_BAM/default.yaml
-default_wdl = default_templates/GATK_variant_discovery_from_BAM/GATK_variant_calling.from_bam.wdl
-default_options = default_templates/GATK_variant_discovery_from_BAM/default.options.json
+default_yaml = default.yaml
+default_wdl = GATK_variant_calling.from_bam.wdl
+default_options = default.options.json
 [hg19]
 ref_fasta = references/hg19/ucsc.hg19.fasta
 ref_fasta_index = references/hg19/ucsc.hg19.fasta.fai
@@ -20,4 +21,4 @@ known_indels = references/hg19/Mills_and_1000G_gold_standard.indels.hg19.vcf
 known_indels_index = references/hg19/Mills_and_1000G_gold_standard.indels.hg19.vcf.idx
 [hg19_1000G_phase3_exome_probe]
 bucket = references/hg19/1000Genome_phase3_exome_probe_targets/
-scattered_probe_list = 1000Genome.Phase3.20130108.exome.targets.list
+scattered_probe_list = 1000Genome.Phase3.20130108.exome.targets.hard_coded.list
