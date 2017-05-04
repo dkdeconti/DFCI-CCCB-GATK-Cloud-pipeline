@@ -9,3 +9,5 @@ RUN apt-get -y update && apt-get install -y build-essential python python-pip
 RUN pip install pyyaml
 ENV PATH $PATH:/usr/bin_dir/
 WORKDIR /usr/workdir
+# Try making from_bam_submission the default process for this docker
+CMD ["python from_bam_submission.py"]
