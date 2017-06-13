@@ -12,9 +12,9 @@ def get_non_uploaded(manifest_filename, uploaded):
     files = []
     with open(manifest_filename, 'rU') as handle:
         for line in handle:
-            f = line.strip('\n').split('\t')[0]
-            if f not in uploaded:
-                files.append(f)
+            downloaded = line.strip('\n').split('\t')[0]
+            if downloaded not in uploaded:
+                files.append(downloaded)
     return files
 
 
