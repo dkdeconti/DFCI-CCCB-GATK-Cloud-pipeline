@@ -5,7 +5,7 @@ import subprocess
 import time
 
 
-def get_uploaded(manifest_filename):
+def get_uploads(manifest_filename):
     '''
     Gets files that aren't uploaded yet.
     '''
@@ -14,7 +14,7 @@ def get_uploaded(manifest_filename):
         for line in handle:
             if not line.strip('\n') or line[0] == "#":
                 continue
-            file.append(line.strip('\n').split()[0][1:-1])
+            files.append(line.strip('\n').split()[0][1:-1])
     return set(files)
 
 
@@ -27,6 +27,14 @@ def populate_uploaded(log_filename):
         for line in handle:
             uploaded.append(line.strip('\n'))
     return set(uploaded)
+
+
+def rm_uploaded(files):
+    '''
+    Deletes listed files.
+    '''
+    cmd = ' '.join(["rm", ' '.join(files)])
+    subprocess.call(cmd, shell=True)
 
 
 def update_log(uploaded, log_filename):
@@ -43,12 +51,12 @@ def upload(files, bucket):
     Uploads files to Google bucket.
     '''
     cmd = ' '.join(["gsutil -m cp", ' '.join(files), bucket])
-    #subprocess.call(cmd, shell=True)
+    subprocess.call(cmd, shell=True)
 
 
 def main():
     '''
-
+    Tracks Aspera download to upload concurrently, and deleting after.
     '''
     # Arg parsing
     desc = "Periodically checks manifest to upload downloaded to google bucket"
@@ -59,7 +67,7 @@ def main():
                         help="target Google ")
     parser.add_argument("-t", "--time", metavar="TIME",
                         help="Wait time intervals in minutes [default: 30min]")
-    parser.add_argument("-l", "-log", metavar="UPLOAD_LOG",
+    parser.add_argument("-l", "--log", metavar="UPLOAD_LOG",
                         help="Log of uploaded files")
     parser.add_argument("-o", "--out", metavar="OUTPUT_LOG",
                         help="output log of uploaded; default=uploaded.log")
@@ -67,15 +75,14 @@ def main():
     args = parser.parse_args()
     # Work
     if args.log:
-        uploaded = populate_uploaded(populate_uploaded(args.log))
+        uploaded = populate_uploaded(args.log)
     else:
         uploaded = set([])
     skips = 0
     while True:
-        to_upload =
-        to_upload = get_uploaded(args.MANIFEST)
-        print "to upload:", to_upload
+        to_upload = get_uploads(args.MANIFEST).difference(uploaded)
         upload(to_upload, args.BUCKET)
+        rm_uploaded(to_upload)
         uploaded.update(to_upload)
         update_log(uploaded, args.out)
         time.sleep(args.time * 60)
