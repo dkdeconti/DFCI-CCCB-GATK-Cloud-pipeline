@@ -88,6 +88,7 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     #proc = subprocess.Popen(script, shell=True,
     #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #_, stderr = proc.communicate()
+    #print stderr
     #code = stderr.split('/')[1].strip('].\n')
     #sys.stderr.write(code + '\n')
     #barcode = inputs.strip('.inputs.json').split('.')[-1]
@@ -150,7 +151,8 @@ def main():
                         help="genome to analyze against [hg19]")
     parser.add_argument("--probe", metavar="PROBE_TYPE",
                         help="probe type for scatter-gather")
-    parser.set_defaults(config=os.path.join(os.path.dirname(__file__),
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    parser.set_defaults(config=os.path.join(script_path,
                                             "config"),
                         genome="hg19",
                         probe="hg19_1000G_phase3_exome_probe")
@@ -159,15 +161,14 @@ def main():
     config = ConfigParser.ConfigParser()
     config.read(args.config)
     # Work
-    #samples = map_bam_tsv(args.bamtsv)
     sys.stderr.write("Submitting jobs...\n")
     codes = [submit_variant_calling(sample_name, bam, args.bucket, args.genome,
                                     args.probe, config)
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
     sys.stderr.write("Done submitting jobs.\n")
-    sys.stderr.write("Waiting for job completion.")
+    #sys.stderr.write("Waiting for job completion.")
     #errors = wait_until_complete(codes)
-    sys.stderr.write("Done waiting for job completion.\n")
+    #sys.stderr.write("Done waiting for job completion.\n")
     #print errors
 
 

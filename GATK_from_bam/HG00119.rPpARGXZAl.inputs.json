@@ -1,6 +1,6 @@
 {
-  "RealignAndVariantCalling.input_bam": "gs://dfci-cccb-pipeline-testing/uploads/HG00096.chrom20.ILLUMINA.bwa.GBR.exome.20120522.bam",
-  "RealignAndVariantCalling.output_basename": "HG00096",
+  "RealignAndVariantCalling.input_bam": "gs://dfci-cccb-pipeline-testing/uploads/HG00119.alt_bwamem_GRCh38DH.20150826.GBR.exome.downsampled.bam",
+  "RealignAndVariantCalling.output_basename": "HG00119",
   "RealignAndVariantCalling.ref_fasta": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta",
   "RealignAndVariantCalling.ref_fasta_index": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.fai",
   "RealignAndVariantCalling.ref_dict": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.dict",

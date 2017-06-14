@@ -1,0 +1,14 @@
+Spin up a Google VM with 100GB of memory
+
+Use http://download.asperasoft.com/download/docs/entsrv/3.7.1/cs_admin_linux/webhelp/general_external/dita/cloud_storage/google_storage_cli.html
+as reference
+
+chmod +x shares_download.sh
+export ASPERA_SCP_FILEPASS=NbdHw6962zWtgIq
+
+./shares_download.sh ./broad_aligned_bams/ \
+https://shares.broadinstitute.org \
+SN0122384:G8TVT2C3L67NU71 \
+SN0122384/
+
+Track with upload_sync.py

@@ -1,0 +1,21 @@
+{
+  "RealignAndVariantCalling.input_bam": "gs://dfci-cccb-pipeline-testing/uploads/HG00121.alt_bwamem_GRCh38DH.20150826.GBR.exome.downsampled.bam",
+  "RealignAndVariantCalling.output_basename": "HG00121",
+  "RealignAndVariantCalling.ref_fasta": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta",
+  "RealignAndVariantCalling.ref_fasta_index": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.fai",
+  "RealignAndVariantCalling.ref_dict": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.dict",
+  "RealignAndVariantCalling.ref_amb": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.amb",
+  "RealignAndVariantCalling.ref_ann": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.ann",
+  "RealignAndVariantCalling.ref_bwt": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.bwt",
+  "RealignAndVariantCalling.ref_pac": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.pac",
+  "RealignAndVariantCalling.ref_sa": "gs://dfci-cccb-pipeline-testing/references/hg19/ucsc.hg19.fasta.sa",
+  "RealignAndVariantCalling.scattered_calling_intervals_list_file": "gs://dfci-cccb-pipeline-testing/references/hg19/1000Genome_phase3_exome_probe_targets/1000Genome.Phase3.20130108.exome.targets.hard_coded.list",
+  "RealignAndVariantCalling.dbsnp": "gs://dfci-cccb-pipeline-testing/references/hg19/dbsnp_137.hg19.vcf",
+  "RealignAndVariantCalling.dbsnp_index": "gs://dfci-cccb-pipeline-testing/references/hg19/dbsnp_137.hg19.vcf.idx",
+  "RealignAndVariantCalling.known_indels": "gs://dfci-cccb-pipeline-testing/references/hg19/Mills_and_1000G_gold_standard.indels.hg19.vcf",
+  "RealignAndVariantCalling.known_indels_index": "gs://dfci-cccb-pipeline-testing/references/hg19/Mills_and_1000G_gold_standard.indels.hg19.vcf.idx",
+  "RealignAndVariantCalling.preemptible_tries": "3",
+  "RealignAndVariantCalling.large_disk": "400",
+  "RealignAndVariantCalling.medium_disk": "300",
+  "RealignAndVariantCalling.small_disk": "200"
+}
