@@ -5,7 +5,7 @@ import subprocess
 import time
 
 
-def get_non_uploaded(manifest_filename, uploaded):
+def get_uploaded(manifest_filename):
     '''
     Gets files that aren't uploaded yet.
     '''
@@ -14,10 +14,8 @@ def get_non_uploaded(manifest_filename, uploaded):
         for line in handle:
             if not line.strip('\n') or line[0] == "#":
                 continue
-            downloaded = line.strip('\n').split()[0][1:-1]
-            if downloaded not in uploaded:
-                files.append(downloaded)
-    return files
+            file.append(line.strip('\n').split()[0][1:-1])
+    return set(files)
 
 
 def populate_uploaded(log_filename):
@@ -69,12 +67,13 @@ def main():
     args = parser.parse_args()
     # Work
     if args.log:
-        uploaded = populate_uploaded(args.log)
+        uploaded = populate_uploaded(populate_uploaded(args.log))
     else:
         uploaded = set([])
     skips = 0
     while True:
-        to_upload = get_non_uploaded(args.MANIFEST, uploaded)
+        to_upload =
+        to_upload = get_uploaded(args.MANIFEST)
         print "to upload:", to_upload
         upload(to_upload, args.BUCKET)
         uploaded.update(to_upload)
@@ -86,7 +85,6 @@ def main():
             skips = 0
         if skips > 3:
             break
-    
 
 
 if __name__ == "__main__":
