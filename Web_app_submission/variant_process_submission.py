@@ -26,7 +26,8 @@ from django.conf import settings
 
 import plot_methods
 
-CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'config.cfg')
+CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                                           'config.cfg')
 CALLBACK_URL = 'analysis/notify/'
 
 def parse_config():
@@ -38,7 +39,8 @@ def parse_config():
 
 def setup(project_pk, config_params):
     
-    # note that project was already confirmed for ownership previously.  No need to check here.
+    # note that project was already confirmed for ownership previously. 
+    # No need to check here.
     project = Project.objects.get(pk=project_pk)
 
     # get the reference genome
@@ -49,14 +51,17 @@ def setup(project_pk, config_params):
     
     # get datasources from db:
     datasources = project.datasource_set.all()
-    datasource_paths = [os.path.join(bucket_name, x.filepath) for x in datasources]
-    datasource_paths = [config_params['gs_prefix'] + x for x in datasource_paths]
+    datasource_paths = [os.path.join(bucket_name, x.filepath)
+                        for x in datasources]
+    datasource_paths = [config_params['gs_prefix'] + x
+                        for x in datasource_paths]
 
     # check that those datasources exist in the actual bucket
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     all_contents = bucket.list_blobs()
-    uploads = [x.name for x in all_contents if x.name.startswith(config_params['upload_folder'])]
+    uploads = [x.name for x in all_contents
+               if x.name.startswith(config_params['upload_folder'])]
     
     # compare-- it's ok if there were more files in the bucket
     bucket_set = set(uploads)
@@ -66,7 +71,8 @@ def setup(project_pk, config_params):
         pass
 
     # create the output bucket
-    result_bucket_name = os.path.join(bucket_name, config_params['output_bucket'])
+    result_bucket_name = os.path.join(bucket_name,
+                                      config_params['output_bucket'])
     #result_bucket = storage_client.create_bucket(result_bucket_name)
 
     # get the mapping of samples to data sources:
@@ -107,7 +113,8 @@ def start_analysis(project_pk):
     This is called when you click 'analyze'
     """
     config_params = parse_config()
-    project, result_bucket_name, sample_mapping = setup(project_pk, config_params)
+    project, result_bucket_name, sample_mapping = setup(project_pk,
+                                                        config_params)
     # do some other things
     config_params.get('default_templates', 'template_loc') == 'False':
     injects = {"BUCKET_INJECTION": bucket,
@@ -157,16 +164,18 @@ def write_completion_message(project):
 
 def handle(project, request):
     """
-    This is not called by any urls, but rather the request object is forwarded on from a central "distributor" method
-    project is a Project object/model
+    This is not called by any urls, but rather the request object is forwarded
+    on from a central "distributor" method project is a Project object/model
 
     This where you can check to see if all the samples/processing is complete
 
-    In my process, as the worker machines finish, they send a GET request to a url which includes the project and sample primary keys.
-    Then, I check the database to see if all the other samples are finished, or whether we have to wait for others to finish.
+    In my process, as the worker machines finish, they send a GET request to 
+    a url which includes the project and sample primary keys.
+    Then, I check the database to see if all the other samples are finished,
+    or whether we have to wait for others to finish.
     """
     print 'handling project %s' % project
-    sample_pk = int(request.GET.get('samplePK', '')) #exceptions can be caught in caller
+    sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
     sample = Sample.objects.get(pk = sample_pk)
     sample.processed = True
     sample.save()
