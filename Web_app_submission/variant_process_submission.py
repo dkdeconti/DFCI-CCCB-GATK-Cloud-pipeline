@@ -1,6 +1,9 @@
 '''
 Runs exome pipeline from within web app.
 '''
+
+# TODO Get project organization from Brian first thing
+
 from google.cloud import storage
 import googleapiclient.discovery
 import os
@@ -10,6 +13,7 @@ import json
 import urllib
 import urllib2
 from ConfigParser import SafeConfigParser
+from string import Template
 import sys
 import datetime
 import re
@@ -83,10 +87,44 @@ def setup(project_pk, config_params):
     for ds in datasources:
         if ds.sample in all_samples:
             sample_mapping[(ds.sample.pk, ds.sample.name)].append(ds)
-    return project, result_bucket_name, sample_mapping
+    return project, bucket, result_bucket_name, sample_mapping
 
 
-def create_template(config, bucket, ref_loc):
+def create_inputs_json(sample_name, bam, genome, probe, config):
+    '''
+    Injects variables into template json for inputs.
+    ''' 
+    # inputs_filename
+    d = {"BUCKET_INJECTION": config.get('default_templates',
+                                        'reference_bucket'),
+         "BAM_INJECTION": bam,
+         "INPUT_BASENAME_INJECTION": sample_name,
+         "PROBE_INJECTION": config.get('default_templates',
+                                       'reference_bucket') +
+                            config.get('hg19_1000G_phase3_exome_probe',
+                                       'bucket') +
+                            config.get('hg19_1000G_phase3_exome_probe',
+                                       'scattered_probe_list'),
+         "REF_FASTA": config.get(genome, 'ref_fasta'),
+         "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
+         "REF_DICT": config.get(genome, 'ref_dict'),
+         "REF_FASTA_AMB": config.get(genome, 'ref_fasta_amb'),
+         "REF_FASTA_ANN": config.get(genome, 'ref_fasta_ann'),
+         "REF_FASTA_BWT": config.get(genome, 'ref_fasta_bwt'),
+         "REF_FASTA_PAC": config.get(genome, 'ref_fasta_pac'),
+         "REF_FASTA_SA": config.get(genome, 'ref_fasta_sa'),
+         "DBSNP": config.get(genome, 'dbsnp'),
+         "DBSNP_INDEX": config.get(genome, 'dbsnp_index'),
+         "KNOWN_INDELS": config.get(genome, 'known_indels'),
+         "KNOWN_INDELS_INDEX": config.get(genome, 'known_indels_index')}
+    with open(config.get('default_templates', 'default_inputs')) as filein:
+        s = Template(filein.read())
+    with open(inputs_filename, 'w') as fileout:
+        fileout.write(s.substitute(d))
+    return inputs_filename
+
+
+def create_submission_template(config, bucket, ref_loc):
     injects = {"BUCKET_INJECTION": bucket,
                "WDL_FILE": os.path.join(ref_loc,
                                         config.get('default_templates',
@@ -95,17 +133,15 @@ def create_template(config, bucket, ref_loc):
                "OPTIONS_FILE": os.path.join(ref_loc,
                                             config.get('default_templates',
                                                        'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, bar_code, "wdl_output"]),
+               "OUTPUT_FOLDER": '-'.join([sample_name, "variant_output"]),
                "YAML_FILE": os.path.join(ref_loc,
                                          config.get('default_templates',
                                                     'default_yaml'))
               }
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
-    sub_filename = '.'.join([sample_name, bar_code, "submission.sh"])
-    with open(sub_filename, 'w') as fileout:
-        fileout.write(template_string.substitute(injects))
-    return sub_filename
+    submission_string = template_string.substitute(injects)
+    return submission_string
 
 
 def start_analysis(project_pk):
@@ -113,23 +149,16 @@ def start_analysis(project_pk):
     This is called when you click 'analyze'
     """
     config_params = parse_config()
-    project, result_bucket_name, sample_mapping = setup(project_pk,
-                                                        config_params)
+    project, bucket, result_bucket_name, sample_mapping = setup(project_pk,
+                                                                config_params)
     # do some other things
-    config_params.get('default_templates', 'template_loc') == 'False':
-    injects = {"BUCKET_INJECTION": bucket,
-               "WDL_FILE": os.path.join(ref_loc,
-                                        config.get('default_templates',
-                                                   'default_wdl')),
-               "INPUTS_FILE": inputs,
-               "OPTIONS_FILE": os.path.join(ref_loc,
-                                            config.get('default_templates',
-                                                       'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, bar_code, "wdl_output"]),
-               "YAML_FILE": os.path.join(ref_loc,
-                                         config.get('default_templates',
-                                                    'default_yaml'))
-              }
+    inputs_json = create_inputs_json()
+    submission_script = create_submission_template()
+    proc = subprocess.Popen(submission_script, shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    code = stderr.split('/')[1].strip('].\n')
 
 
 def finish(project):
