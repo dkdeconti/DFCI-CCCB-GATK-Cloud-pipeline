@@ -24,9 +24,9 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
          "INPUT_BASENAME_INJECTION": sample_name,
          "PROBE_INJECTION": config.get('default_templates',
                                        'reference_bucket') +
-                            config.get('hg19_1000G_phase3_exome_probe',
+                            config.get(probe,
                                        'bucket') +
-                            config.get('hg19_1000G_phase3_exome_probe',
+                            config.get(probe,
                                        'scattered_probe_list'),
          "REF_FASTA": config.get(genome, 'ref_fasta'),
          "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
@@ -85,16 +85,16 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config)
     sub_script = create_sub_script(sample_name, bucket, inputs, config)
     with open(sub_script) as filein:
         script = filein.read().replace('\n', '').replace('\\', '')
-    #proc = subprocess.Popen(script, shell=True,
-    #                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    #_, stderr = proc.communicate()
+    proc = subprocess.Popen(script, shell=True,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _, stderr = proc.communicate()
     #print stderr
-    #code = stderr.split('/')[1].strip('].\n')
-    #sys.stderr.write(code + '\n')
-    #barcode = inputs.strip('.inputs.json').split('.')[-1]
-    #with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
-    #    fileout.write(code)
-    #return code
+    code = stderr.split('/')[1].strip('].\n')
+    sys.stderr.write(code + '\n')
+    barcode = inputs.strip('.inputs.json').split('.')[-1]
+    with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
+        fileout.write(code)
+    return code
 
 
 def map_bam_tsv(tsv):
@@ -144,7 +144,7 @@ def main():
     parser.add_argument("bamtsv", metavar="BAM_TSV",
                         help="sample name and BAM TSV file")
     parser.add_argument("bucket", metavar="BucketName",
-                        help="google bucket")
+                        help="google bucket (leave out trailing /)")
     parser.add_argument("--config", metavar="CONFIG",
                         help="Config file")
     parser.add_argument("--genome", metavar="GENOME",
@@ -155,7 +155,7 @@ def main():
     parser.set_defaults(config=os.path.join(script_path,
                                             "config"),
                         genome="hg19",
-                        probe="hg19_1000G_phase3_exome_probe")
+                        probe="haloplex")
     args = parser.parse_args()
     # Set up config
     config = ConfigParser.ConfigParser()
@@ -166,6 +166,8 @@ def main():
                                     args.probe, config)
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
     sys.stderr.write("Done submitting jobs.\n")
+    with open("all_submitted_codes.txt", 'w') as handle:
+        [handle.write(code + '\n') for code in codes]
     #sys.stderr.write("Waiting for job completion.")
     #errors = wait_until_complete(codes)
     #sys.stderr.write("Done waiting for job completion.\n")

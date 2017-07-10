@@ -1,0 +1,21 @@
+{
+  "RealignAndVariantCalling.input_bam": "$BAM_INJECTION",
+  "RealignAndVariantCalling.output_basename": "$INPUT_BASENAME_INJECTION",
+  "RealignAndVariantCalling.ref_fasta": "$BUCKET_INJECTION$REF_FASTA",
+  "RealignAndVariantCalling.ref_fasta_index": "$BUCKET_INJECTION$REF_FASTA_INDEX",
+  "RealignAndVariantCalling.ref_dict": "$BUCKET_INJECTION$REF_DICT",
+  "RealignAndVariantCalling.ref_amb": "$BUCKET_INJECTION$REF_FASTA_AMB",
+  "RealignAndVariantCalling.ref_ann": "$BUCKET_INJECTION$REF_FASTA_ANN",
+  "RealignAndVariantCalling.ref_bwt": "$BUCKET_INJECTION$REF_FASTA_BWT",
+  "RealignAndVariantCalling.ref_pac": "$BUCKET_INJECTION$REF_FASTA_PAC",
+  "RealignAndVariantCalling.ref_sa": "$BUCKET_INJECTION$REF_FASTA_SA",
+  "RealignAndVariantCalling.scattered_calling_intervals_list_file": "$PROBE_INJECTION",
+  "RealignAndVariantCalling.dbsnp": "$BUCKET_INJECTION$DBSNP",
+  "RealignAndVariantCalling.dbsnp_index": "$BUCKET_INJECTION$DBSNP_INDEX",
+  "RealignAndVariantCalling.known_indels": "$BUCKET_INJECTION$KNOWN_INDELS",
+  "RealignAndVariantCalling.known_indels_index": "$BUCKET_INJECTION$KNOWN_INDELS_INDEX",
+  "RealignAndVariantCalling.preemptible_tries": "3",
+  "RealignAndVariantCalling.large_disk": "400",
+  "RealignAndVariantCalling.medium_disk": "300",
+  "RealignAndVariantCalling.small_disk": "200"
+}

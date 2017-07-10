@@ -12,7 +12,7 @@ import glob
 import json
 import urllib
 import urllib2
-from ConfigParser import SafeConfigParser
+from ConfigParser import ConfigParser
 from string import Template
 import sys
 import datetime
@@ -28,20 +28,19 @@ from download.models import Resource
 
 from django.conf import settings
 
-import plot_methods
 
 CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                            'config.cfg')
 CALLBACK_URL = 'analysis/notify/'
 
-def parse_config():
-    with open(CONFIG_FILE) as cfg_handle:
-        parser = SafeConfigParser()
-        parser.readfp(cfg_handle)
-        return parser.defaults()
+#def parse_config():
+#    with open(CONFIG_FILE) as cfg_handle:
+#        parser = SafeConfigParser()
+#        parser.readfp(cfg_handle)
+#        return parser.defaults()
 
 
-def setup(project_pk, config_params):
+def setup(project_pk):
     
     # note that project was already confirmed for ownership previously. 
     # No need to check here.
@@ -49,7 +48,6 @@ def setup(project_pk, config_params):
 
     # get the reference genome
     reference_genome = project.reference_organism.reference_genome
-    config_params['reference_genome'] = reference_genome
 
     bucket_name = project.bucket
     
@@ -57,6 +55,7 @@ def setup(project_pk, config_params):
     datasources = project.datasource_set.all()
     datasource_paths = [os.path.join(bucket_name, x.filepath)
                         for x in datasources]
+    # TODO move into settings
     datasource_paths = [config_params['gs_prefix'] + x
                         for x in datasource_paths]
 
@@ -65,7 +64,7 @@ def setup(project_pk, config_params):
     bucket = storage_client.get_bucket(bucket_name)
     all_contents = bucket.list_blobs()
     uploads = [x.name for x in all_contents
-               if x.name.startswith(config_params['upload_folder'])]
+               if x.name.startswith(settings.UPLOAD_PREFIX)] #string of rel path
     
     # compare-- it's ok if there were more files in the bucket
     bucket_set = set(uploads)
@@ -73,11 +72,6 @@ def setup(project_pk, config_params):
     if len(datasource_set.difference(uploads)) > 0:
         # TODO raise exception
         pass
-
-    # create the output bucket
-    result_bucket_name = os.path.join(bucket_name,
-                                      config_params['output_bucket'])
-    #result_bucket = storage_client.create_bucket(result_bucket_name)
 
     # get the mapping of samples to data sources:
     sample_mapping = {}
@@ -87,23 +81,30 @@ def setup(project_pk, config_params):
     for ds in datasources:
         if ds.sample in all_samples:
             sample_mapping[(ds.sample.pk, ds.sample.name)].append(ds)
-    return project, bucket, result_bucket_name, sample_mapping
+    # sample_mapping
+    #   key = (primary key of sample as int representing sample, sample name)
+    #   value = object representing file ex: ds.path <- path to source
+    #           ex: gs://<bucket>/ds.path where ds.path == path/file.bam
+    return project, bucket_name, sample_mapping
 
 
 def create_inputs_json(sample_name, bam, genome, probe, config):
     '''
     Injects variables into template json for inputs.
     ''' 
-    # inputs_filename
+    #input_filename = os.path.join(os.path.abspath(os.path.dirname(__file__)),
+    #                              sample_name + ".inputs.json")
+    input_filename = os.path.join(settings.TEMP_DIR,
+                                  sample_name + ".inputs.json")
     d = {"BUCKET_INJECTION": config.get('default_templates',
                                         'reference_bucket'),
          "BAM_INJECTION": bam,
          "INPUT_BASENAME_INJECTION": sample_name,
          "PROBE_INJECTION": config.get('default_templates',
                                        'reference_bucket') +
-                            config.get('hg19_1000G_phase3_exome_probe',
+                            config.get(probe,
                                        'bucket') +
-                            config.get('hg19_1000G_phase3_exome_probe',
+                            config.get(probe,
                                        'scattered_probe_list'),
          "REF_FASTA": config.get(genome, 'ref_fasta'),
          "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
@@ -124,23 +125,25 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     return inputs_filename
 
 
-def create_submission_template(config, bucket, ref_loc):
+def create_submission_template(config, bucket):
+    current_dir = os.path.abspath(os.path.dirname(__file__))
     injects = {"BUCKET_INJECTION": bucket,
-               "WDL_FILE": os.path.join(ref_loc,
+               "WDL_FILE": os.path.join(current_dir,
                                         config.get('default_templates',
                                                    'default_wdl')),
                "INPUTS_FILE": inputs,
-               "OPTIONS_FILE": os.path.join(ref_loc,
+               "OPTIONS_FILE": os.path.join(current_dir,
                                             config.get('default_templates',
                                                        'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, "variant_output"]),
-               "YAML_FILE": os.path.join(ref_loc,
+               "OUTPUT_FOLDER": '-'.join([sample_name, "output"]),
+               "YAML_FILE": os.path.join(current_dir,
                                          config.get('default_templates',
                                                     'default_yaml'))
               }
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
-    submission_string = template_string.substitute(injects)
+    submission_string = \
+    template_string.substitute(injects).replace('\n', '').replace('\\', '')
     return submission_string
 
 
@@ -148,17 +151,31 @@ def start_analysis(project_pk):
     """
     This is called when you click 'analyze'
     """
-    config_params = parse_config()
-    project, bucket, result_bucket_name, sample_mapping = setup(project_pk,
-                                                                config_params)
-    # do some other things
-    inputs_json = create_inputs_json()
-    submission_script = create_submission_template()
-    proc = subprocess.Popen(submission_script, shell=True,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
-    code = stderr.split('/')[1].strip('].\n')
+    #config_params = parse_config()
+    config = ConfigParser.ConfigParser()
+    config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)),
+                             'config.cfg'))
+    project, bucket_name, sample_mapping = setup(project_pk)
+    # do work
+    codes = {}
+    for key, ds in sample_mapping.items():
+        sample_pk, sample_name = key
+        # set bam
+        # TODO adjust ds.filepath to single
+        bam = "gs://" + os.path.join(project, ds.filepath) # sets bam location
+        inputs_json = create_inputs_json(sample_name, bam, "hg19",
+                                         "hg19_1000G_phase3_exome_probe",
+                                         config)
+        submission_script = create_submission_template(config,
+                                                       bucket_name,
+                                                       inputs_json)
+        proc = subprocess.Popen(submission_script,
+                                shell=True,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        codes[key] = stderr.split('/')[1].strip('].\n')
+        os.remove(inputs_json) # delete inputs json when done with it
 
 
 def finish(project):
@@ -169,7 +186,7 @@ def finish(project):
 
     # notify the client
     # the second arg is supposedd to be a list of emails
-    print 'send notification email'
+    print('send notification email')
     message_html = write_completion_message(project)
     email_utils.send_email(message_html, [project.owner.email,])
 
@@ -203,7 +220,7 @@ def handle(project, request):
     Then, I check the database to see if all the other samples are finished,
     or whether we have to wait for others to finish.
     """
-    print 'handling project %s' % project
+    print('handling project %s' % project)
     sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
     sample = Sample.objects.get(pk = sample_pk)
     sample.processed = True
