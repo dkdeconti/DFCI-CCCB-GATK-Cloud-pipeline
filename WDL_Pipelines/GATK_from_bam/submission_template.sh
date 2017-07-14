@@ -7,3 +7,4 @@ gcloud alpha genomics pipelines run \
 --inputs-from-file WORKFLOW_OPTIONS=$OPTIONS_FILE \
 --inputs WORKSPACE=$BUCKET_INJECTION/workspace \
 --inputs OUTPUTS=$BUCKET_INJECTION/outputs/$OUTPUT_FOLDER
+--labels ${LABELS_INJECTION}

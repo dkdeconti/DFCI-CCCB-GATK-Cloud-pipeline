@@ -67,7 +67,8 @@ def create_sub_script(sample_name, bucket, inputs, config):
                "OUTPUT_FOLDER": '-'.join([sample_name, bar_code, "wdl_output"]),
                "YAML_FILE": os.path.join(ref_loc,
                                          config.get('default_templates',
-                                                    'default_yaml'))
+                                                    'default_yaml')),
+               "LABELS_INJECTION": inputs
               }
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
@@ -77,12 +78,13 @@ def create_sub_script(sample_name, bucket, inputs, config):
     return sub_filename
 
 
-def submit_variant_calling(sample_name, bam_file, bucket, genome, probe, config):
+def submit_variant_calling(sample_name, bam_file, bucket, genome, probe,
+                           labels, config):
     '''
     Submission script for individual bam.
     '''
     inputs = create_inputs_json(sample_name, bam_file, genome, probe, config)
-    sub_script = create_sub_script(sample_name, bucket, inputs, config)
+    sub_script = create_sub_script(sample_name, bucket, inputs, labels, config)
     with open(sub_script) as filein:
         script = filein.read().replace('\n', '').replace('\\', '')
     proc = subprocess.Popen(script, shell=True,
@@ -145,6 +147,8 @@ def main():
                         help="sample name and BAM TSV file")
     parser.add_argument("bucket", metavar="BucketName",
                         help="google bucket (leave out trailing /)")
+    parser.add_argument("labels", metavar="LABEL",
+                        help="Google cloud label [format: key1=val1:key2=val2]")
     parser.add_argument("--config", metavar="CONFIG",
                         help="Config file")
     parser.add_argument("--genome", metavar="GENOME",
@@ -163,7 +167,7 @@ def main():
     # Work
     sys.stderr.write("Submitting jobs...\n")
     codes = [submit_variant_calling(sample_name, bam, args.bucket, args.genome,
-                                    args.probe, config)
+                                    args.probe, args.labels, config)
              for sample_name, bam in map_bam_tsv(args.bamtsv).items()]
     sys.stderr.write("Done submitting jobs.\n")
     with open("all_submitted_codes.txt", 'w') as handle:
