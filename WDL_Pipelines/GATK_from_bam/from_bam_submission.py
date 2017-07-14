@@ -14,10 +14,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     '''
     Injects variables into template json for inputs.
     '''
-    bar_code = ''.join(random.SystemRandom().choice(string.ascii_letters +
-                                                    string.digits)
-                       for _ in range(10))
-    inputs_filename = '.'.join([sample_name, bar_code, "inputs.json"])
+    inputs_filename = '.'.join([sample_name, "inputs.json"])
     d = {"BUCKET_INJECTION": config.get('default_templates',
                                         'reference_bucket'),
          "BAM_INJECTION": bam,
@@ -51,7 +48,6 @@ def create_sub_script(sample_name, bucket, inputs, config):
     '''
     Inject variables into template submission script.
     '''
-    bar_code = inputs.strip('.inputs.json').split('.')[-1]
     if config.get('default_templates', 'template_loc') == 'False':
         ref_loc = os.path.dirname(os.path.realpath(__file__))
     else:
@@ -64,7 +60,7 @@ def create_sub_script(sample_name, bucket, inputs, config):
                "OPTIONS_FILE": os.path.join(ref_loc,
                                             config.get('default_templates',
                                                        'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, bar_code, "wdl_output"]),
+               "OUTPUT_FOLDER": '-'.join([sample_name, "wdl_output"]),
                "YAML_FILE": os.path.join(ref_loc,
                                          config.get('default_templates',
                                                     'default_yaml')),
@@ -72,7 +68,7 @@ def create_sub_script(sample_name, bucket, inputs, config):
               }
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
-    sub_filename = '.'.join([sample_name, bar_code, "submission.sh"])
+    sub_filename = '.'.join([sample_name, "submission.sh"])
     with open(sub_filename, 'w') as fileout:
         fileout.write(template_string.substitute(injects))
     return sub_filename
@@ -93,8 +89,7 @@ def submit_variant_calling(sample_name, bam_file, bucket, genome, probe,
     #print stderr
     code = stderr.split('/')[1].strip('].\n')
     sys.stderr.write(code + '\n')
-    barcode = inputs.strip('.inputs.json').split('.')[-1]
-    with open('.'.join([sample_name, barcode, "operation_id"]), 'w') as fileout:
+    with open('.'.join([sample_name, "operation_id"]), 'w') as fileout:
         fileout.write(code)
     return code
 
