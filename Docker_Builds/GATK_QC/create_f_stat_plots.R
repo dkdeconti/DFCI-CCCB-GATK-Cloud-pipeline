@@ -1,3 +1,7 @@
+library(lattice)
+
+args <- commandArgs(trailingOnly = TRUE)
+
 f_stat_file = args[1]
 ped_file = args[2]
 plot_filename = args[3]

@@ -1,5 +1,7 @@
 library(gplots)
 
+args <- commandArgs(trailingOnly = TRUE)
+
 coverage_file = args[1]
 coverage_summary_file = args[2]
 

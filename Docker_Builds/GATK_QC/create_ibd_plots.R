@@ -1,5 +1,8 @@
 library(lattice)
 
+args <- commandArgs(trailingOnly = TRUE)
+
+
 ibs_file <- args[1]
 plot_filename <- args[2]
 

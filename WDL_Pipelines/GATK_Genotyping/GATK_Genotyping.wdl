@@ -78,6 +78,7 @@ workflow GenotyepAndQC {
     }
     output {
         MergeGenotypedVCF.output_vcf
+        VQSR.output_vcf
     }
 }
 

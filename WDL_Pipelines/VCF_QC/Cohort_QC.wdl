@@ -2,12 +2,9 @@
 # Workflow Definition
 ##############################################################################
 
-workflow GenotyepAndQC {
-    File input_bams_file
-    File input_vcfs_file
+workflow GenotypeAndQC {
     File input_bams_vcfs_file
-    Array[Array[File]] input_bams = read_tsv(input_bams_file)
-    Array[File] input_vcfs = read_lines(input_vcfs_file)
+    File input_genotyped_vcf
     Array[Array[File]] input_bams_vcfs = read_tsv(input_bams_vcfs_file)
     String output_basename
     File ped
@@ -17,23 +14,28 @@ workflow GenotyepAndQC {
     File ref_dict
 
     File probe_intervals
-    File scattered_calling_intervals_list_file
-    Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
 
-    #scatter (bams_vcfs in input_bams_vcfs) {
-    #    File input_bam_1 = bams_vcfs[0]
-    #    File input_bam_index_1 = bams_vcfs[1]
-    #    File input_vcf_1 = bams_vcfs[2]
-    #    String vbd_output_basename_1 = bams_vcfs[3]
-    #
-    #    call VerifyBamID {
-    #        input:
-    #            input_vcf = input_vcf,
-    #            input_bam = input_bam,
-    #            input_bam_index = input_bam_index,
-    #            output_basename = vbd_output_basename
-    #    }
-    #}
+    scatter (bams_vcfs in input_bams_vcfs) {
+        File input_bam = bams_vcfs[0]
+        File input_bam_index = bams_vcfs[1]
+        File input_vcf = bams_vcfs[2]
+        String vbd_output_basename = bams_vcfs[3]
+    
+        #call VerifyBamID {
+        #    input:
+        #        input_vcf = input_vcf,
+        #        input_bam = input_bam,
+        #        input_bam_index = input_bam_index,
+        #        output_basename = vbd_output_basename
+        #}
+        call DepthOfCoverage {
+            input:
+                input_bam = input_bam,
+                input_bam_index = input_bam_index,
+                probe_intervals = probe_intervals,
+                output_basename = vbd_output_basename
+        }
+    }
     #call MergeVerifyBamID {
     #    input:
     #        inputs_selfsm = VerifyBamID.output_selfsm,
@@ -41,38 +43,24 @@ workflow GenotyepAndQC {
     #}
     call XChromosomeFStat {
         input:
-            genotyped_vcf = MergeGenotypedVCF.output_vcf
+            genotyped_vcf = input_genotyped_vcf
     }
     call PlotFStat {
         input:
             f_stats = XChromosomeFStat.f_stats,
             ped = ped
     }
-    scatter (bams_vcfs in input_bams_vcfs) {
-        File input_bam_2 = bams_vcfs[0]
-        File input_bam_index_2 = bams_vcfs[1]
-        String vbd_output_basename_2 = bams_vcfs[3]
-
-        call DepthOfCoverage {
-            input:
-                input_bam = input_bam_2,
-                input_bam_index = input_bam_index_2,
-                probe_intervals = probe_intervals,
-                output_basename = vbd_output_basename_2
-        }
-    }
     call PlotDepthOfCoverage {
         input:
             input_beds = DepthOfCoverage.coverage_bed
     }
     output {
-        MergeGenotypedVCF.output_vcf
         PlotDepthOfCoverage.sample_statistics
         PlotDepthOfCoverage.sample_summary
         PlotDepthOfCoverage.depth_histogram
         PlotDepthOfCoverage.depth_boxplot
         PlotFStat.f_stats_plot
-        #VerifyBamID.output_selfsm
+        #MergeVerifyBamID.output_vbd
     }
 }
 
@@ -139,8 +127,10 @@ task PlotDepthOfCoverage {
     Array[File] input_beds
 
     command {
-        python convert_bedtools_hist_to_GATK_DoC.py ${sep=' ' input_beds}
-        Rscript create_coverage_heatmap.R coverage.sample_statistics coverage.sample_summary
+        python ~/scratch/QC_test/convert_bedtools_hist_to_GATK_DoC.py \
+        ${sep=' ' input_beds}
+        Rscript ~/scratch/QC_test/create_coverage_heatmap.R \
+        coverage.sample_statistics coverage.sample_summary
     }
     output {
         File sample_statistics = "coverage.sample_statistics"
@@ -154,7 +144,7 @@ task XChromosomeFStat {
     File genotyped_vcf
 
     command {
-        ~/bin/vcftools --het --chr chrX --vcf ${genotyped_vcf} --out f_stat.het
+        ~/bin/vcftools --het --chr chrX --vcf ${genotyped_vcf} --out f_stat
     }
     output {
         File f_stats = "f_stat.het"
@@ -166,7 +156,8 @@ task PlotFStat {
     File ped
 
     command {
-        Rscript create_f_stat_plots.R ${f_stats} ${ped} f_stat.density_plot.pdf
+        Rscript ~/scratch/QC_test/create_f_stat_plots.R \
+        ${f_stats} ${ped} f_stat.density_plot.pdf
     }
     output {
         File f_stats_plot = "f_stat.density_plot.pdf"
@@ -192,7 +183,7 @@ task IdentityByDescent {
             --extract ${genotyped_vcf}.prelim.gt.prune.in \
             --genome \
             --out ibs_autosome;
-        Rscript create_ibd_plots.R ibs_autosome.genome ibd.density_plots.pdf
+        Rscript ~/scratch/QC_test/create_ibd_plots.R ibs_autosome.genome ibd.density_plots.pdf
     }
     output {
         File ibs_autosome_genome = "ibs_autosome.genome"
