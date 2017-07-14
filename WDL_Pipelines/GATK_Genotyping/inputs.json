@@ -1,0 +1,22 @@
+{
+  "GenotyepAndQC.thousand_genomes": "File",
+  "GenotyepAndQC.small_disk": "Int",
+  "GenotyepAndQC.ref_dict": "File",
+  "GenotyepAndQC.omni": "File",
+  "GenotyepAndQC.hapmap": "File",
+  "GenotyepAndQC.input_vcfs_file": "File",
+  "GenotyepAndQC.thousand_genomes_index": "File",
+  "GenotyepAndQC.scattered_calling_intervals_list_file": "File",
+  "GenotyepAndQC.output_basename": "String",
+  "GenotyepAndQC.ref_fasta": "File",
+  "GenotyepAndQC.omni_index": "File",
+  "GenotyepAndQC.mills": "File",
+  "GenotyepAndQC.large_disk": "Int",
+  "GenotyepAndQC.medium_disk": "Int",
+  "GenotyepAndQC.preemptible_tries": "Int",
+  "GenotyepAndQC.hapmap_index": "File",
+  "GenotyepAndQC.dbsnp": "File",
+  "GenotyepAndQC.ref_fasta_index": "File",
+  "GenotyepAndQC.mills_index": "File",
+  "GenotyepAndQC.dbsnp_index": "File"
+}
