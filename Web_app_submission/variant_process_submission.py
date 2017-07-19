@@ -125,7 +125,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     return inputs_filename
 
 
-def create_submission_template(config, bucket):
+def create_submission_template(config, bucket, inputs):
     current_dir = os.path.abspath(os.path.dirname(__file__))
     injects = {"BUCKET_INJECTION": bucket,
                "WDL_FILE": os.path.join(current_dir,
