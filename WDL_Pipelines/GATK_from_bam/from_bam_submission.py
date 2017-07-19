@@ -44,7 +44,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     return inputs_filename
 
 
-def create_sub_script(sample_name, bucket, inputs, config):
+def create_sub_script(sample_name, bucket, inputs, labels, config):
     '''
     Inject variables into template submission script.
     '''
@@ -64,7 +64,7 @@ def create_sub_script(sample_name, bucket, inputs, config):
                "YAML_FILE": os.path.join(ref_loc,
                                          config.get('default_templates',
                                                     'default_yaml')),
-               "LABELS_INJECTION": inputs
+               "LABELS_INJECTION": labels
               }
     with open(config.get('default_templates', 'default_submission')) as filein:
         template_string = Template(filein.read())
