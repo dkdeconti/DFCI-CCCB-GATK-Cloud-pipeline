@@ -118,11 +118,15 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
          "DBSNP_INDEX": config.get(genome, 'dbsnp_index'),
          "KNOWN_INDELS": config.get(genome, 'known_indels'),
          "KNOWN_INDELS_INDEX": config.get(genome, 'known_indels_index')}
-    with open(config.get('default_templates', 'default_inputs')) as filein:
+    template_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 config.get('default_templates',
+                                            'default_inputs'))
+    with open(template_json) as filein:
         s = Template(filein.read())
-    with open(inputs_filename, 'w') as fileout:
+    inputs_file = os.path.join('/tmp', inputs_filename)
+    with open(inputs_file, 'w') as fileout:
         fileout.write(s.substitute(d))
-    return inputs_filename
+    return inputs_file
 
 
 def create_submission_template(config, sample_name, bucket, inputs):
@@ -141,12 +145,17 @@ def create_submission_template(config, sample_name, bucket, inputs):
                                                     'default_yaml'))
               }
     template_file = os.path.join(current_dir, config.get('default_templates',
-                                                         'default_submission'))
+                                                    'default_submission'))
     with open(template_file) as filein:
         template_string = Template(filein.read())
     submission_string = \
     template_string.substitute(injects).replace('\n', '').replace('\\', '')
-    return submission_string
+    #print submission_string
+    submission_filename = '.'.join([sample_name, "submission.sh"])
+    submission_file = os.path.join('/tmp/', submission_filename)
+    with open(submission_file, 'w') as fileout:
+        fileout.write(submission_string)
+    return submission_file
 
 
 def start_analysis(project_pk):
