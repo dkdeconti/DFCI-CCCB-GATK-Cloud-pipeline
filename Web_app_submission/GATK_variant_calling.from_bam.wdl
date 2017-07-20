@@ -452,7 +452,7 @@ task HaplotypeCaller {
         memory: "10 GB"
         cpu: "1"
         disks: "local-disk " + disk_size + " HDD"
-        preemptible: preemptible_tries
+        preemptible: false
     }
     output {
         File output_gvcf = "${gvcf_name}.g.vcf"
