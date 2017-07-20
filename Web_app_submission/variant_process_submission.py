@@ -188,6 +188,7 @@ def start_analysis(project_pk):
         stdout, stderr = proc.communicate()
         codes[key] = stderr.split('/')[1].strip('].\n')
         os.remove(inputs_json) # delete inputs json when done with it
+        os.remove(submission_script)
 
 
 def finish(project):
