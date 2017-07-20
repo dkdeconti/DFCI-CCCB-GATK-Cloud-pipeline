@@ -125,7 +125,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     return inputs_filename
 
 
-def create_submission_template(config, bucket, inputs):
+def create_submission_template(config, sample_name, bucket, inputs):
     current_dir = os.path.abspath(os.path.dirname(__file__))
     injects = {"BUCKET_INJECTION": bucket,
                "WDL_FILE": os.path.join(current_dir,
@@ -140,7 +140,9 @@ def create_submission_template(config, bucket, inputs):
                                          config.get('default_templates',
                                                     'default_yaml'))
               }
-    with open(config.get('default_templates', 'default_submission')) as filein:
+    template_file = os.path.join(current_dir, config.get('default_templates',
+                                                         'default_submission'))
+    with open(template_file) as filein:
         template_string = Template(filein.read())
     submission_string = \
     template_string.substitute(injects).replace('\n', '').replace('\\', '')
@@ -167,6 +169,7 @@ def start_analysis(project_pk):
                                          "hg19_1000G_phase3_exome_probe",
                                          config)
         submission_script = create_submission_template(config,
+                                                       sample_name,
                                                        bucket_name,
                                                        inputs_json)
         proc = subprocess.Popen(submission_script,
