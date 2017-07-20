@@ -150,7 +150,7 @@ def create_submission_template(config, sample_name, bucket, inputs):
         template_string = Template(filein.read())
     submission_string = \
     template_string.substitute(injects).replace('\n', '').replace('\\', '')
-    #print submission_string
+    print submission_string  # for debugging purposes
     submission_filename = '.'.join([sample_name, "submission.sh"])
     submission_file = os.path.join('/tmp/', submission_filename)
     with open(submission_file, 'w') as fileout:
