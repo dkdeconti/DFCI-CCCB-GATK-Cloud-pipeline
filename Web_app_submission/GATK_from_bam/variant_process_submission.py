@@ -163,7 +163,7 @@ def start_analysis(project_pk):
     This is called when you click 'analyze'
     """
     #config_params = parse_config()
-    config = ConfigParser.ConfigParser()
+    config = ConfigParser()
     config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)),
                              'config.cfg'))
     project, bucket_name, sample_mapping = setup(project_pk)
@@ -181,7 +181,7 @@ def start_analysis(project_pk):
                                                        sample_name,
                                                        bucket_name,
                                                        inputs_json)
-        proc = subprocess.Popen(submission_script,
+        proc = subprocess.Popen("sh %s" % submission_script,
                                 shell=True,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)

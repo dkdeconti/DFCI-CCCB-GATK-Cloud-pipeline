@@ -3,7 +3,8 @@
 ##############################################################################
 
 workflow RealignAndVariantCalling {
-    File input_bam
+    File first_fastq
+    File second_fastq
     String output_basename
     File scattered_calling_intervals_list_file
     Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
@@ -34,16 +35,24 @@ workflow RealignAndVariantCalling {
     Int preemptible_tries
 
     call GetBwaVersion
-    call RemoveNonProperPairs {
+    #call RemoveNonProperPairs {
+    #    input:
+    #        input_bam = input_bam,
+    #        output_bam_basename = output_basename,
+    #        disk_size = medium_disk,
+    #        preemptible_tries = preemptible_tries
+    #}
+    #call UnmapBam {
+    #    input:
+    #        input_bam = RemoveNonProperPairs.properpairs_bam,
+    #        output_bam_basename = output_basename,
+    #        disk_size = medium_disk,
+    #        preemptible_tries = preemptible_tries
+    #}
+    call FastqToUnmappedBam {
         input:
-            input_bam = input_bam,
-            output_bam_basename = output_basename,
-            disk_size = medium_disk,
-            preemptible_tries = preemptible_tries
-    }
-    call UnmapBam {
-        input:
-            input_bam = RemoveNonProperPairs.properpairs_bam,
+            first_fastq = first_fastq,
+            second_fastq = second_fastq,
             output_bam_basename = output_basename,
             disk_size = medium_disk,
             preemptible_tries = preemptible_tries
@@ -165,17 +174,49 @@ task GetBwaVersion {
     }
 }
 
-task RemoveNonProperPairs {
-    File input_bam
+#task RemoveNonProperPairs {
+#    File input_bam
+#    String output_bam_basename
+#
+#    Int disk_size
+#    Int preemptible_tries
+#
+#    command {
+#        samtools view -f 2 -b \
+#        -o ${output_bam_basename}.proper-pairs.bam \
+#        ${input_bam}
+#    }
+#    runtime {
+#        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+#        memory: "2 GB"
+#        cpu: "1"
+#        disks: "local-disk " + disk_size + " HDD"
+#        preemptible: preemptible_tries
+#    }
+#    output {
+#        File properpairs_bam = "${output_bam_basename}.proper-pairs.bam"
+#    }
+#}
+
+task FastqToUnmappedBam {
+    File first_fastq
+    File second_fastq
     String output_bam_basename
 
     Int disk_size
     Int preemptible_tries
 
     command {
-        samtools view -f 2 -b \
-        -o ${output_bam_basename}.proper-pairs.bam \
-        ${input_bam}
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            FASTQ=${first_fastq} \
+            FASTQ2=${second_fastq} \
+            OUTPUT=${output_bam_basename}.unmapped.bam \
+            READ_GROUP_NAME=
+            SAMPLE_NAME=
+            LIBRARY_NAME=
+            PLATFORM_UNIT=
+            PLATFORM_UNIT=
+            SEQUENCING_CENTER=
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
@@ -185,34 +226,34 @@ task RemoveNonProperPairs {
         preemptible: preemptible_tries
     }
     output {
-        File properpairs_bam = "${output_bam_basename}.proper-pairs.bam"
+        File unmapped_bam = "${output_bam_basename}.unmapped.bam"
     }
 }
 
-task UnmapBam {
-    File input_bam
-    String output_bam_basename
-
-    Int disk_size
-    Int preemptible_tries
-
-    command {
-        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
-            RevertSam \
-            I=${input_bam} \
-            O=${output_bam_basename}.proper-pairs.unmapped.bam
-    }
-    runtime {
-        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
-        memory: "3 GB"
-        cpu: "2"
-        disks: "local-disk " + disk_size + " HDD"
-        preemptible: preemptible_tries
-    }
-    output {
-        File output_bam = "${output_bam_basename}.proper-pairs.unmapped.bam"
-    }
-}
+#task UnmapBam {
+#    File input_bam
+#    String output_bam_basename
+#
+#    Int disk_size
+#    Int preemptible_tries
+#
+#    command {
+#        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+#            RevertSam \
+#            I=${input_bam} \
+#            O=${output_bam_basename}.proper-pairs.unmapped.bam
+#    }
+#    runtime {
+#        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+#        memory: "3 GB"
+#        cpu: "2"
+#        disks: "local-disk " + disk_size + " HDD"
+#        preemptible: preemptible_tries
+#    }
+#    output {
+#        File output_bam = "${output_bam_basename}.proper-pairs.unmapped.bam"
+#    }
+#}
 
 task SamToFastqAndBwaMem {
     File input_bam
