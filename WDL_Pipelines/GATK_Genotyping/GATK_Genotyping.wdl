@@ -2,8 +2,9 @@
 # Workflow Definition
 ##############################################################################
 
-workflow GenotyepAndQC {
+workflow GenotypeAndQC {
     File input_vcfs_file
+    Array[File] input_vcfs = read_lines(input_vcfs_file)
     String output_basename
     
     File ref_fasta
@@ -17,21 +18,30 @@ workflow GenotyepAndQC {
     # small_disk = 200
     # medium_disk = 300
     # large_disk = 400
-    # preemptible_tries = 3
     Int small_disk
     Int medium_disk
     Int large_disk
 
+    scatter (input_vcf in input_vcfs) {
+        call SortVCF {
+            input:
+                input_vcf = input_vcf,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                ref_dict = ref_dict,
+                disk_size = small_disk
+        }
+    }
     scatter (scatter_interval in scattered_calling_intervals) {
         call GenotypeGVCFs {
             input:
-                input_vcfs = input_vcfs,
+                input_vcfs = SortVCFs.output_sorted_vcf,
                 interval_list = scatter_interval,
                 output_basename = output_basename,
                 ref_dict = ref_dict,
                 ref_fasta = ref_fasta,
                 ref_fasta_index = ref_fasta_index,
-                disk_size = medium_disk,
+                disk_size = medium_disk
         }
     }
     call MergeGenotypedVCF {
@@ -45,12 +55,37 @@ workflow GenotyepAndQC {
     }
     output {
         MergeGenotypedVCF.output_vcf
+        SortVCFs.*
     }
 }
 
 ##############################################################################
 # Task Definitions
 ##############################################################################
+
+task SortVCF {
+    File input_vcf
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+
+    Int disk_size
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/picard.jar \
+            I=${input_vcf}
+            O=${input_vcf}.sorted.g.vcf
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+    }
+    output {
+        File output_sorted_vcf = "${input_vcf}.sorted.g.vcf"
+    }
+}
 
 task GenotypeGVCFs {
     Array[File] input_vcfs
@@ -90,12 +125,18 @@ task MergeGenotypedVCF {
     Int disk_size
 
     command {
-        java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
-            org.broadinstitute.gatk.tools.CatVariants \
-            -R ${ref_fasta} \
-            -V ${sep=' -V ' input_vcfs} \
-            -out ${output_vcf_name}.gt.g.vcf \
-            --assumeSorted
+        #java -Xmx8000m -jar /usr/bin_dir/picard.jar \
+        #    I=${sep=' I=' input_vcfs} \
+        #    O=${output_vcf_name}.g.vcf;
+        #java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
+        #    org.broadinstitute.gatk.tools.CatVariants \
+        #    -R ${ref_fasta} \
+        #    -V ${sep=' -V ' input_vcfs} \
+        #    -out ${output_vcf_name}.gt.g.vcf \
+        #    --assumeSorted
+        java -Xmx3000m -jar /usr/bin_dir/picard.jar \
+            INPUT=${sep=' INPUT=' input_vcfs} \
+            OUTPUT=${output_vcf_name}.gt.g.vcf
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
