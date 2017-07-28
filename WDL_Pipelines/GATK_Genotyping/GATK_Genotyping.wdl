@@ -35,7 +35,7 @@ workflow GenotypeAndQC {
     scatter (scatter_interval in scattered_calling_intervals) {
         call GenotypeGVCFs {
             input:
-                input_vcfs = SortVCFs.output_sorted_vcf,
+                input_vcfs = SortVCF.output_sorted_vcf,
                 interval_list = scatter_interval,
                 output_basename = output_basename,
                 ref_dict = ref_dict,
@@ -55,7 +55,7 @@ workflow GenotypeAndQC {
     }
     output {
         MergeGenotypedVCF.output_vcf
-        SortVCFs.*
+        SortVCF.*
     }
 }
 
