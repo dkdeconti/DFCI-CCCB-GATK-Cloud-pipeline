@@ -20,6 +20,13 @@ LINK_ROOT = 'https://storage.cloud.google.com/%s/%s'
 
 @task(name='check_completion')
 def check_completion(project, code_map, bucket_name):
+    '''
+
+    params
+    project: 
+    code_map:
+    bucket_name: bucket name
+    '''
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     while code_map:
@@ -49,13 +56,5 @@ def check_completion(project, code_map, bucket_name):
     </body>
     </html>
     """
-    email_utils.send_email(message_html, [project_owner,], \
+    email_utils.send_email(message_html, [project.owner.email,], \
                            '[CCCB] Variant calling analysis completed')
-
-
-
-@task(name='deseq_call')
-def check_analysis_complete(deseq_cmd, results_dir, cloud_dge_dir, contrast_name, bucket_name, project_pk):
-    pass
-    # Example delivery file setup
-    #r = Resource(project=project, basename = os.path.basename(zipfile), public_link = public_link, resource_type = 'Compressed results')
