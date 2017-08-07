@@ -1,232 +1,490 @@
-'''
-Runs exome pipeline from within web app.
-'''
-# TODO Get project organization from Brian first thing
-from google.cloud import storage
-import googleapiclient.discovery
-import os
-import shutil
-import glob
-import json
-import urllib
-import urllib2
-from ConfigParser import ConfigParser
-from string import Template
-import sys
-import datetime
-import re
-import subprocess
-import random
-import pandas as pd
-sys.path.append(os.path.abspath('..'))
-import email_utils
-from client_setup.models import Project, Sample
-from download.models import Resource
-from django.conf import settings
-CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                                           'config.cfg')
-CALLBACK_URL = 'analysis/notify/'
-#def parse_config():
-#    with open(CONFIG_FILE) as cfg_handle:
-#        parser = SafeConfigParser()
-#        parser.readfp(cfg_handle)
-#        return parser.defaults()
-def setup(project_pk):
-    
-    # note that project was already confirmed for ownership previously. 
-    # No need to check here.
-    project = Project.objects.get(pk=project_pk)
-    # get the reference genome
-    reference_genome = project.reference_organism.reference_genome
-    bucket_name = project.bucket
-    
-    # get datasources from db:
-    datasources = project.datasource_set.all()
-    datasource_paths = [os.path.join(bucket_name, x.filepath)
-                        for x in datasources]
-    #TODO put gs:// in settings
-    datasource_paths = ['gs://' + x
-                        for x in datasource_paths]
-    # check that those datasources exist in the actual bucket
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
-    all_contents = bucket.list_blobs()
-    uploads = [x.name for x in all_contents
-               if x.name.startswith(settings.UPLOAD_PREFIX)] # string of rel path
-    
-    # compare-- it's ok if there were more files in the bucket
-    bucket_set = set(uploads)
-    datasource_set = set(datasource_paths)
-    if len(datasource_set.difference(uploads)) > 0:
-        # TODO raise exception
-        pass
-    # get the mapping of samples to data sources:
-    sample_mapping = {}
-    all_samples = project.sample_set.all()
-    for s in all_samples:
-        sample_mapping[(s.pk, s.name)] = []
-    for ds in datasources:
-        if ds.sample in all_samples:
-            sample_mapping[(ds.sample.pk, ds.sample.name)].append(ds)
-    # sample_mapping
-    #   key = (primary key of sample as int representing sample, sample name)
-    #   value = object representing file ex: ds.path <- path to source
-    #           ex: gs://<bucket>/ds.path where ds.path == path/file.bam
-    return project, bucket_name, sample_mapping
+##############################################################################
+# Workflow Definition
+##############################################################################
 
+workflow RealignAndVariantCalling {
+    File input_bam
+    String output_basename
+    File scattered_calling_intervals_list_file
+    Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
 
-def create_inputs_json(sample_name, bam, genome, probe, config):
-    '''
-    Injects variables into template json for inputs.
-    ''' 
-    #input_filename = os.path.join(os.path.abspath(os.path.dirname(__file__)),
-    #                              sample_name + ".inputs.json")
-    #inputs_filename = os.path.join(settings.TEMP_DIR,
-    #                              sample_name + ".inputs.json")
-    inputs_filename = '.'.join([sample_name, "inputs.json"])
-    d = {"BUCKET_INJECTION": config.get('default_templates',
-                                        'reference_bucket'),
-         "BAM_INJECTION": bam,
-         "INPUT_BASENAME_INJECTION": sample_name,
-         "PROBE_INJECTION": config.get('default_templates',
-                                       'reference_bucket') +
-                            config.get(probe,
-                                       'bucket') +
-                            config.get(probe,
-                                       'scattered_probe_list'),
-         "REF_FASTA": config.get(genome, 'ref_fasta'),
-         "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
-         "REF_DICT": config.get(genome, 'ref_dict'),
-         "REF_FASTA_AMB": config.get(genome, 'ref_fasta_amb'),
-         "REF_FASTA_ANN": config.get(genome, 'ref_fasta_ann'),
-         "REF_FASTA_BWT": config.get(genome, 'ref_fasta_bwt'),
-         "REF_FASTA_PAC": config.get(genome, 'ref_fasta_pac'),
-         "REF_FASTA_SA": config.get(genome, 'ref_fasta_sa'),
-         "DBSNP": config.get(genome, 'dbsnp'),
-         "DBSNP_INDEX": config.get(genome, 'dbsnp_index'),
-         "KNOWN_INDELS": config.get(genome, 'known_indels'),
-         "KNOWN_INDELS_INDEX": config.get(genome, 'known_indels_index')}
-    template_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                                 config.get('default_templates',
-                                            'default_inputs'))
-    with open(template_json) as filein:
-        s = Template(filein.read())
-    inputs_file = os.path.join('/tmp', inputs_filename)
-    with open(inputs_file, 'w') as fileout:
-        fileout.write(s.substitute(d))
-    return inputs_file
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+    File ref_bwt
+    File ref_sa
+    File ref_amb
+    File ref_ann
+    File ref_pac
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
 
-def create_submission_template(config, sample_name, bucket, inputs):
-    current_dir = os.path.abspath(os.path.dirname(__file__))
-    injects = {"BUCKET_INJECTION": bucket,
-               "WDL_FILE": os.path.join(current_dir,
-                                        config.get('default_templates',
-                                                   'default_wdl')),
-               "INPUTS_FILE": inputs,
-               "OPTIONS_FILE": os.path.join(current_dir,
-                                            config.get('default_templates',
-                                                       'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, "output"]),
-               "YAML_FILE": os.path.join(current_dir,
-                                         config.get('default_templates',
-                                                    'default_yaml'))
-               }
-    template_file = os.path.join(current_dir, config.get('default_templates',
-                                                    'default_submission'))
-    with open(template_file) as filein:
-        template_string = Template(filein.read())
-    submission_string = \
-    template_string.substitute(injects).replace('\n', '').replace('\\', '')
-    print submission_string
-    submission_filename = '.'.join([sample_name, "submission.sh"])
-    submission_file = os.path.join('/tmp/', submission_filename)
-    with open(submission_file, 'w') as fileout:
-        fileout.write(submission_string)
-    return submission_file
+    String bwa_commandline="bwa mem -p -v 3 -t 3 $bash_ref_fasta"
 
-def start_analysis(project_pk):
-    """
-    This is called when you click 'analyze'
-    """
-    #config_params = parse_config()
-    config = ConfigParser()
-    config.read(os.path.join(os.path.abspath(os.path.dirname(__file__)),
-                             'config.cfg'))
-    project, bucket_name, sample_mapping = setup(project_pk)
-    # do work
-    codes = {}
-    for key, ds_list in sample_mapping.items():
-        ds = ds_list[0]
-        sample_pk, sample_name = key
-        # set bam location
-        bam = "gs://" + os.path.join(project.bucket, ds.filepath)
-        inputs_json = create_inputs_json(sample_name, bam, "hg19",
-                                         "hg19_1000G_phase3_exome_probe",
-                                         config)
-        submission_script = create_submission_template(config,
-                                                       sample_name,
-                                                       bucket_name,
-                                                       inputs_json)
-        proc = subprocess.Popen("sh %s" % submission_script,
-                                shell=True,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        codes[key] = stderr.split('/')[1].strip('].\n')
-        # Delete injected files after done with them
-        #os.remove(inputs_json)
-        #os.remove(submission_script)
+    # Recommended sizes:
+    # small_disk = 200
+    # medium_disk = 300
+    # large_disk = 400
+    # preemptible_tries = 3
+    Int small_disk
+    Int medium_disk
+    Int large_disk
+    Int preemptible_tries
 
-def finish(project):
-    """
-    This pulls together everything and gets it ready for download.
-    Can do things like zipping up output files, creating reports, etc. here
-    """
-    # notify the client
-    # the second arg is supposedd to be a list of emails
-    print 'send notification email'
-    message_html = write_completion_message(project)
-    email_utils.send_email(message_html, [project.owner.email,], \
-                           '[CCCB] Variant analysis complete.')
+    call GetBwaVersion
+    call RemoveNonProperPairs {
+        input:
+            input_bam = input_bam,
+            output_bam_basename = output_basename,
+            disk_size = medium_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call UnmapBam {
+        input:
+            input_bam = RemoveNonProperPairs.properpairs_bam,
+            output_bam_basename = output_basename,
+            disk_size = medium_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call SamToFastqAndBwaMem {
+        input:
+            input_bam = UnmapBam.output_bam,
+            bwa_commandline = bwa_commandline,
+            output_bam_basename = output_basename,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            ref_dict = ref_dict,
+            ref_bwt = ref_bwt,
+            ref_amb = ref_amb,
+            ref_ann = ref_ann,
+            ref_pac = ref_pac,
+            ref_sa = ref_sa,
+            disk_size = large_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call MergeBamAlignment {
+        input:
+            unmapped_bam = UnmapBam.output_bam,
+            bwa_commandline = bwa_commandline,
+            bwa_version = GetBwaVersion.version,
+            realn_bam = SamToFastqAndBwaMem.output_bam,
+            output_bam_basename = output_basename,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            ref_dict = ref_dict,
+            disk_size = large_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call SortAndFixTags {
+        input:
+            input_bam = MergeBamAlignment.output_bam,
+            output_bam_basename = output_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = medium_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call BaseRecalibrator {
+        input:
+            input_bam = SortAndFixTags.output_bam,
+            input_bam_index = SortAndFixTags.output_bam_index,
+            recalibration_report_filename = output_basename + ".recal_data.table",
+            dbsnp = dbsnp,
+            dbsnp_index = dbsnp_index,
+            known_indels = known_indels,
+            known_indels_index = known_indels_index,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call ApplyBQSR {
+        input:
+            input_bam = SortAndFixTags.output_bam,
+            input_bam_index = SortAndFixTags.output_bam_index,
+            output_bam_basename = output_basename,
+            recalibration_report = BaseRecalibrator.recalibration_report,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+    scatter (scatter_interval in scattered_calling_intervals) {
+        call HaplotypeCaller {
+            input:
+                input_bam = ApplyBQSR.recalibrated_bam,
+                input_bam_index = ApplyBQSR.recalibrated_bam_index,
+                interval_list = scatter_interval,
+                gvcf_name = output_basename,
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = small_disk,
+                preemptible_tries = preemptible_tries
+        }
+    }
+    call MergeVCFs {
+        input:
+            input_vcfs = HaplotypeCaller.output_gvcf,
+            output_vcf_name = output_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
 
-def write_completion_message(project):
-    """
-    This function has the text for your email message to the user.
-    """
-    message_html = """\
-    <html>
-      <head></head>
-      <body>
-          <p>
-            Your RNA-Seq analysis (%s) is complete!  Log-in to the CCCB application site to view and download your results.
-          </p>
-      </body>
-    </html>
-    """ % project.name
-    return message_html
+    output {
+        ApplyBQSR.recalibrated_bam
+        ApplyBQSR.recalibrated_bam_index
+        MergeVCFs.output_vcf
+    }
+}
 
-def handle(project, request):
-    """
-    This is not called by any urls, but rather the request object is forwarded
-    on from a central "distributor" method project is a Project object/model
-    This where you can check to see if all the samples/processing is complete
-    In my process, as the worker machines finish, they send a GET request to 
-    a url which includes the project and sample primary keys.
-    Then, I check the database to see if all the other samples are finished,
-    or whether we have to wait for others to finish.
-    """
-    print 'handling project %s' % project
-    sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
-    sample = Sample.objects.get(pk = sample_pk)
-    sample.processed = True
-    sample.save()
-    print 'saved'
-    # now check to see if everyone is done
-    all_samples = project.sample_set.all()
-    if all([s.processed for s in all_samples]):
-        print 'All samples have completed!'
-        project.in_progress = False
-        project.completed = True
-        project.finish_time = datetime.datetime.now()
-        project.save()
-        finish(project)
+##############################################################################
+# Task Definitions
+##############################################################################
+
+task GetBwaVersion {
+    command {
+        bwa 2>&1 | \
+        grep -e '^Version' | \
+        sed 's/Version: //'
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "1 GB"
+    }
+    output {
+        String version = read_string(stdout())
+    }
+}
+
+task RemoveNonProperPairs {
+    File input_bam
+    String output_bam_basename
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        samtools view -f 2 -b \
+        -o ${output_bam_basename}.proper-pairs.bam \
+        ${input_bam}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "2 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File properpairs_bam = "${output_bam_basename}.proper-pairs.bam"
+    }
+}
+
+task UnmapBam {
+    File input_bam
+    String output_bam_basename
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            RevertSam \
+            I=${input_bam} \
+            O=${output_bam_basename}.proper-pairs.unmapped.bam
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "3 GB"
+        cpu: "2"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.proper-pairs.unmapped.bam"
+    }
+}
+
+task SamToFastqAndBwaMem {
+    File input_bam
+    String bwa_commandline
+    String output_bam_basename
+
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+    File ref_amb
+    File ref_ann
+    File ref_bwt
+    File ref_pac
+    File ref_sa
+
+    Int disk_size
+    Int preemptible_tries
+
+    command <<<
+        # set the bash variable needed for the command-line
+        # initialized in workflow, but invoked here
+        bash_ref_fasta=${ref_fasta}
+        # May have a problem with picard here...
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            SamToFastq \
+            INPUT=${input_bam} \
+            FASTQ=/dev/stdout \
+            INTERLEAVE=true \
+            NON_PF=true | \
+        ${bwa_commandline} - \
+        2> >(tee ${output_bam_basename}.realn.bwa.stderr.log >&2) \
+        > ${output_bam_basename}.realn.sam
+        #samtools view -b ${output_bam_basename}.realn.sam \
+        #> ${output_bam_basename}.realn.bam
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            SamFormatConverter \
+            I=${output_bam_basename}.realn.sam \
+            O=${output_bam_basename}.realn.bam
+    >>>
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        cpu: "3"
+        memory: "14 GB"
+        cpu: "16"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.realn.bam"
+        File bwa_stderr_log = "${output_bam_basename}.realn.bwa.stderr.log"
+    }
+}
+
+task MergeBamAlignment {
+    File unmapped_bam
+    String bwa_commandline
+    String bwa_version
+    File realn_bam
+    String output_bam_basename
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            MergeBamAlignment \
+            VALIDATION_STRINGENCY=SILENT \
+            EXPECTED_ORIENTATIONS=FR \
+            ATTRIBUTES_TO_RETAIN=X0 \
+            ALIGNED_BAM=${realn_bam} \
+            UNMAPPED_BAM=${unmapped_bam} \
+            OUTPUT=${output_bam_basename}.realn.info.bam \
+            REFERENCE_SEQUENCE=${ref_fasta} \
+            PAIRED_RUN=true \
+            SORT_ORDER="unsorted" \
+            IS_BISULFITE_SEQUENCE=false \
+            ALIGNED_READS_ONLY=false \
+            CLIP_ADAPTERS=false \
+            MAX_RECORDS_IN_RAM=2000000 \
+            ADD_MATE_CIGAR=true \
+            MAX_INSERTIONS_OR_DELETIONS=-1 \
+            PRIMARY_ALIGNMENT_STRATEGY=MostDistant \
+            PROGRAM_RECORD_ID="bwamem" \
+            PROGRAM_GROUP_VERSION="${bwa_version}" \
+            PROGRAM_GROUP_COMMAND_LINE="${bwa_commandline}" \
+            PROGRAM_GROUP_NAME="bwamem" \
+            UNMAP_CONTAMINANT_READS=true
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "3500 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.realn.info.bam"
+    }
+}
+
+task SortAndFixTags {
+    File input_bam
+    String output_bam_basename
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/picard.jar \
+            SortSam \
+            INPUT=${input_bam} \
+            OUTPUT=/dev/stdout \
+            SORT_ORDER="coordinate" \
+            CREATE_INDEX=false \
+            CREATE_MD5_FILE=false | \
+        java -Xmx1000m -jar /usr/bin_dir/picard.jar \
+            SetNmAndUqTags \
+            INPUT=/dev/stdin \
+            OUTPUT=${output_bam_basename}.realn.sorted.bam \
+            CREATE_INDEX=true \
+            CREATE_MD5_FILE=false \
+            REFERENCE_SEQUENCE=${ref_fasta};
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.realn.sorted.bam"
+        File output_bam_index = "${output_bam_basename}.realn.sorted.bai"
+    }
+}
+
+#BQSR is slow. Try splitting it.
+task BaseRecalibrator {
+    File input_bam
+    File input_bam_index
+    String recalibration_report_filename
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx4000m -jar /usr/bin_dir/GATK.jar \
+            -T BaseRecalibrator \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${recalibration_report_filename} \
+            -knownSites ${dbsnp} \
+            -knownSites ${known_indels}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "5000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibration_report = "${recalibration_report_filename}"
+    }
+}
+
+task ApplyBQSR {
+    File input_bam
+    File input_bam_index
+    String output_bam_basename
+    File recalibration_report
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2000m -jar /usr/bin_dir/GATK.jar \
+            -T PrintReads \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -BQSR ${recalibration_report}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "3 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
+    }
+}
+
+task HaplotypeCaller {
+    File input_bam
+    File input_bam_index
+    File interval_list
+    String gvcf_name
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
+            -T HaplotypeCaller \
+            -R ${ref_fasta} \
+            -o ${gvcf_name}.g.vcf \
+            -I ${input_bam} \
+            -L ${interval_list} \
+            --emitRefConfidence GVCF \
+            -variant_index_type LINEAR \
+            -variant_index_parameter 128000
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: false
+    }
+    output {
+        File output_gvcf = "${gvcf_name}.g.vcf"
+        #File output_gvcf_index = "${gvcf_name}.g.vcf.tbi"
+    }
+}
+
+task MergeVCFs {
+    Array[File] input_vcfs
+    String output_vcf_name
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
+            org.broadinstitute.gatk.tools.CatVariants \
+            -R ${ref_fasta} \
+            -V ${sep=' -V ' input_vcfs} \
+            -out ${output_vcf_name}.g.vcf \
+            --assumeSorted
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "4 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_vcf = "${output_vcf_name}.g.vcf"
+    }
+}
