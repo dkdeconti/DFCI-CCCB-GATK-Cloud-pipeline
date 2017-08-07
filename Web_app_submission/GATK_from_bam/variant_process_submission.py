@@ -31,6 +31,7 @@ CALLBACK_URL = 'analysis/notify/'
 #        parser = SafeConfigParser()
 #        parser.readfp(cfg_handle)
 #        return parser.defaults()
+
 def setup(project_pk):
     
     # note that project was already confirmed for ownership previously. 
@@ -73,7 +74,6 @@ def setup(project_pk):
     #   value = object representing file ex: ds.path <- path to source
     #           ex: gs://<bucket>/ds.path where ds.path == path/file.bam
     return project, bucket_name, sample_mapping
-
 
 def create_inputs_json(sample_name, bam, genome, probe, config):
     '''
@@ -146,31 +146,7 @@ def create_submission_template(config, sample_name, bucket, inputs):
 
 def start_analysis(project_pk):
     """
-    This is called when you click 'analyze'def handle(project, request):
-    """
-    This is not called by any urls, but rather the request object is forwarded
-    on from a central "distributor" method project is a Project object/model
-    This where you can check to see if all the samples/processing is complete
-    In my process, as the worker machines finish, they send a GET request to 
-    a url which includes the project and sample primary keys.
-    Then, I check the database to see if all the other samples are finished,
-    or whether we have to wait for others to finish.
-    """
-    print 'handling project %s' % project
-    sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
-    sample = Sample.objects.get(pk = sample_pk)
-    sample.processed = True
-    sample.save()
-    print 'saved'
-    # now check to see if everyone is done
-    all_samples = project.sample_set.all()
-    if all([s.processed for s in all_samples]):
-        print 'All samples have completed!'
-        project.in_progress = False
-        project.completed = True
-        project.finish_time = datetime.datetime.now()
-        project.save()
-        finish(project)
+    This is called when you click 'analyze'
     """
     #config_params = parse_config()
     config = ConfigParser()
@@ -200,57 +176,3 @@ def start_analysis(project_pk):
         # Delete injected files after done with them
         #os.remove(inputs_json)
         #os.remove(submission_script)
-
-def finish(project):
-    """
-    This pulls together everything and gets it ready for download.
-    Can do things like zipping up output files, creating reports, etc. here
-    """
-    # notify the client
-    # the second arg is supposedd to be a list of emails
-    print 'send notification email'
-    message_html = write_completion_message(project)
-    email_utils.send_email(message_html, [project.owner.email,], \
-                           '[CCCB] Variant analysis complete.')
-
-def write_completion_message(project):
-    """
-    This function has the text for your email message to the user.
-    """
-    message_html = """\
-    <html>
-      <head></head>
-      <body>
-          <p>
-            Your RNA-Seq analysis (%s) is complete!  Log-in to the CCCB application site to view and download your results.
-          </p>
-      </body>
-    </html>
-    """ % project.name
-    return message_html
-
-def handle(project, request):
-    """
-    This is not called by any urls, but rather the request object is forwarded
-    on from a central "distributor" method project is a Project object/model
-    This where you can check to see if all the samples/processing is complete
-    In my process, as the worker machines finish, they send a GET request to 
-    a url which includes the project and sample primary keys.
-    Then, I check the database to see if all the other samples are finished,
-    or whether we have to wait for others to finish.
-    """
-    print 'handling project %s' % project
-    sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
-    sample = Sample.objects.get(pk = sample_pk)
-    sample.processed = True
-    sample.save()
-    print 'saved'
-    # now check to see if everyone is done
-    all_samples = project.sample_set.all()
-    if all([s.processed for s in all_samples]):
-        print 'All samples have completed!'
-        project.in_progress = False
-        project.completed = True
-        project.finish_time = datetime.datetime.now()
-        project.save()
-        finish(project)
