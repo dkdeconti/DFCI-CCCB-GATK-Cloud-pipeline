@@ -1,9 +1,7 @@
 '''
 Runs exome pipeline from within web app.
 '''
-
 # TODO Get project organization from Brian first thing
-
 from google.cloud import storage
 import googleapiclient.discovery
 import os
@@ -18,53 +16,43 @@ import sys
 import datetime
 import re
 import subprocess
-
+import random
 import pandas as pd
-
 sys.path.append(os.path.abspath('..'))
 import email_utils
 from client_setup.models import Project, Sample
 from download.models import Resource
-
 from django.conf import settings
-
-
 CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                            'config.cfg')
 CALLBACK_URL = 'analysis/notify/'
-
 #def parse_config():
 #    with open(CONFIG_FILE) as cfg_handle:
 #        parser = SafeConfigParser()
 #        parser.readfp(cfg_handle)
 #        return parser.defaults()
-
-
 def setup(project_pk):
     
     # note that project was already confirmed for ownership previously. 
     # No need to check here.
     project = Project.objects.get(pk=project_pk)
-
     # get the reference genome
     reference_genome = project.reference_organism.reference_genome
-
     bucket_name = project.bucket
     
     # get datasources from db:
     datasources = project.datasource_set.all()
     datasource_paths = [os.path.join(bucket_name, x.filepath)
                         for x in datasources]
-    # TODO move into settings
-    datasource_paths = [config_params['gs_prefix'] + x
+    #TODO put gs:// in settings
+    datasource_paths = ['gs://' + x
                         for x in datasource_paths]
-
     # check that those datasources exist in the actual bucket
     storage_client = storage.Client()
     bucket = storage_client.get_bucket(bucket_name)
     all_contents = bucket.list_blobs()
     uploads = [x.name for x in all_contents
-               if x.name.startswith(settings.UPLOAD_PREFIX)] #string of rel path
+               if x.name.startswith(settings.UPLOAD_PREFIX)] # string of rel path
     
     # compare-- it's ok if there were more files in the bucket
     bucket_set = set(uploads)
@@ -72,7 +60,6 @@ def setup(project_pk):
     if len(datasource_set.difference(uploads)) > 0:
         # TODO raise exception
         pass
-
     # get the mapping of samples to data sources:
     sample_mapping = {}
     all_samples = project.sample_set.all()
@@ -94,8 +81,9 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     ''' 
     #input_filename = os.path.join(os.path.abspath(os.path.dirname(__file__)),
     #                              sample_name + ".inputs.json")
-    input_filename = os.path.join(settings.TEMP_DIR,
-                                  sample_name + ".inputs.json")
+    #inputs_filename = os.path.join(settings.TEMP_DIR,
+    #                              sample_name + ".inputs.json")
+    inputs_filename = '.'.join([sample_name, "inputs.json"])
     d = {"BUCKET_INJECTION": config.get('default_templates',
                                         'reference_bucket'),
          "BAM_INJECTION": bam,
@@ -118,7 +106,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
          "DBSNP_INDEX": config.get(genome, 'dbsnp_index'),
          "KNOWN_INDELS": config.get(genome, 'known_indels'),
          "KNOWN_INDELS_INDEX": config.get(genome, 'known_indels_index')}
-    template_json = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    template_json = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
                                  config.get('default_templates',
                                             'default_inputs'))
     with open(template_json) as filein:
@@ -127,7 +115,6 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
     with open(inputs_file, 'w') as fileout:
         fileout.write(s.substitute(d))
     return inputs_file
-
 
 def create_submission_template(config, sample_name, bucket, inputs):
     current_dir = os.path.abspath(os.path.dirname(__file__))
@@ -143,24 +130,47 @@ def create_submission_template(config, sample_name, bucket, inputs):
                "YAML_FILE": os.path.join(current_dir,
                                          config.get('default_templates',
                                                     'default_yaml'))
-              }
+               }
     template_file = os.path.join(current_dir, config.get('default_templates',
                                                     'default_submission'))
     with open(template_file) as filein:
         template_string = Template(filein.read())
     submission_string = \
     template_string.substitute(injects).replace('\n', '').replace('\\', '')
-    print submission_string  # for debugging purposes
+    print submission_string
     submission_filename = '.'.join([sample_name, "submission.sh"])
     submission_file = os.path.join('/tmp/', submission_filename)
     with open(submission_file, 'w') as fileout:
         fileout.write(submission_string)
     return submission_file
 
-
 def start_analysis(project_pk):
     """
-    This is called when you click 'analyze'
+    This is called when you click 'analyze'def handle(project, request):
+    """
+    This is not called by any urls, but rather the request object is forwarded
+    on from a central "distributor" method project is a Project object/model
+    This where you can check to see if all the samples/processing is complete
+    In my process, as the worker machines finish, they send a GET request to 
+    a url which includes the project and sample primary keys.
+    Then, I check the database to see if all the other samples are finished,
+    or whether we have to wait for others to finish.
+    """
+    print 'handling project %s' % project
+    sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
+    sample = Sample.objects.get(pk = sample_pk)
+    sample.processed = True
+    sample.save()
+    print 'saved'
+    # now check to see if everyone is done
+    all_samples = project.sample_set.all()
+    if all([s.processed for s in all_samples]):
+        print 'All samples have completed!'
+        project.in_progress = False
+        project.completed = True
+        project.finish_time = datetime.datetime.now()
+        project.save()
+        finish(project)
     """
     #config_params = parse_config()
     config = ConfigParser()
@@ -169,11 +179,11 @@ def start_analysis(project_pk):
     project, bucket_name, sample_mapping = setup(project_pk)
     # do work
     codes = {}
-    for key, ds in sample_mapping.items():
+    for key, ds_list in sample_mapping.items():
+        ds = ds_list[0]
         sample_pk, sample_name = key
-        # set bam
-        # TODO adjust ds.filepath to single
-        bam = "gs://" + os.path.join(project, ds.filepath) # sets bam location
+        # set bam location
+        bam = "gs://" + os.path.join(project.bucket, ds.filepath)
         inputs_json = create_inputs_json(sample_name, bam, "hg19",
                                          "hg19_1000G_phase3_exome_probe",
                                          config)
@@ -187,22 +197,21 @@ def start_analysis(project_pk):
                                 stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         codes[key] = stderr.split('/')[1].strip('].\n')
-        os.remove(inputs_json) # delete inputs json when done with it
-        os.remove(submission_script)
-
+        # Delete injected files after done with them
+        #os.remove(inputs_json)
+        #os.remove(submission_script)
 
 def finish(project):
     """
     This pulls together everything and gets it ready for download.
     Can do things like zipping up output files, creating reports, etc. here
     """
-
     # notify the client
     # the second arg is supposedd to be a list of emails
-    print('send notification email')
+    print 'send notification email'
     message_html = write_completion_message(project)
-    email_utils.send_email(message_html, [project.owner.email,])
-
+    email_utils.send_email(message_html, [project.owner.email,], \
+                           '[CCCB] Variant analysis complete.')
 
 def write_completion_message(project):
     """
@@ -220,25 +229,21 @@ def write_completion_message(project):
     """ % project.name
     return message_html
 
-
 def handle(project, request):
     """
     This is not called by any urls, but rather the request object is forwarded
     on from a central "distributor" method project is a Project object/model
-
     This where you can check to see if all the samples/processing is complete
-
     In my process, as the worker machines finish, they send a GET request to 
     a url which includes the project and sample primary keys.
     Then, I check the database to see if all the other samples are finished,
     or whether we have to wait for others to finish.
     """
-    print('handling project %s' % project)
+    print 'handling project %s' % project
     sample_pk = int(request.GET.get('samplePK', '')) # exceptions can be caught in caller
     sample = Sample.objects.get(pk = sample_pk)
     sample.processed = True
     sample.save()
-
     print 'saved'
     # now check to see if everyone is done
     all_samples = project.sample_set.all()
