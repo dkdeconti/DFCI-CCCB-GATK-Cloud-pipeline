@@ -6,7 +6,7 @@ workflow RealignAndVariantCalling {
     File input_bam
     String output_basename
     File scattered_calling_intervals_list_file
-    Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
+    Array[String] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
 
     File ref_fasta
     File ref_fasta_index
@@ -119,7 +119,7 @@ workflow RealignAndVariantCalling {
             input:
                 input_bam = ApplyBQSR.recalibrated_bam,
                 input_bam_index = ApplyBQSR.recalibrated_bam_index,
-                interval_list = scatter_interval,
+                interval = scatter_interval,
                 gvcf_name = output_basename,
                 ref_dict = ref_dict,
                 ref_fasta = ref_fasta,
@@ -428,7 +428,7 @@ task ApplyBQSR {
 task HaplotypeCaller {
     File input_bam
     File input_bam_index
-    File interval_list
+    String interval
     String gvcf_name
     File ref_dict
     File ref_fasta
@@ -442,7 +442,7 @@ task HaplotypeCaller {
             -R ${ref_fasta} \
             -o ${gvcf_name}.g.vcf \
             -I ${input_bam} \
-            -L ${interval_list} \
+            -L ${interval} \
             --emitRefConfidence GVCF \
             -variant_index_type LINEAR \
             -variant_index_parameter 128000
@@ -470,12 +470,10 @@ task MergeVCFs {
     Int preemptible_tries
 
     command {
-        java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
-            org.broadinstitute.gatk.tools.CatVariants \
-            -R ${ref_fasta} \
-            -V ${sep=' -V ' input_vcfs} \
-            -out ${output_vcf_name}.g.vcf \
-            --assumeSorted
+        java -Xmx3000m -jar /usr/bin_dir/picard.jar \
+            MergeVCFs \
+            INPUT=${sep=' INPUT=' input_vcfs} \
+            OUTPUT=${output_vcf_name}.g.vcf
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/basic-seq-tools"

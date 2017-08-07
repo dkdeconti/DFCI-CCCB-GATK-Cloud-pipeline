@@ -75,7 +75,7 @@ def setup(project_pk):
     #           ex: gs://<bucket>/ds.path where ds.path == path/file.bam
     return project, bucket_name, sample_mapping
 
-def create_inputs_json(sample_name, bam, genome, probe, config):
+def create_inputs_json(sample_name, bam, genome, config):
     '''
     Injects variables into template json for inputs.
     ''' 
@@ -90,9 +90,7 @@ def create_inputs_json(sample_name, bam, genome, probe, config):
          "INPUT_BASENAME_INJECTION": sample_name,
          "PROBE_INJECTION": config.get('default_templates',
                                        'reference_bucket') +
-                            config.get(probe,
-                                       'bucket') +
-                            config.get(probe,
+                            config.get(genome,
                                        'scattered_probe_list'),
          "REF_FASTA": config.get(genome, 'ref_fasta'),
          "REF_FASTA_INDEX": config.get(genome, "ref_fasta_index"),
@@ -137,7 +135,7 @@ def create_submission_template(config, sample_name, bucket, inputs):
         template_string = Template(filein.read())
     submission_string = \
     template_string.substitute(injects).replace('\n', '').replace('\\', '')
-    print submission_string
+    print submission_string # goes to logger automatically
     submission_filename = '.'.join([sample_name, "submission.sh"])
     submission_file = os.path.join('/tmp/', submission_filename)
     with open(submission_file, 'w') as fileout:
@@ -161,7 +159,6 @@ def start_analysis(project_pk):
         # set bam location
         bam = "gs://" + os.path.join(project.bucket, ds.filepath)
         inputs_json = create_inputs_json(sample_name, bam, "hg19",
-                                         "hg19_1000G_phase3_exome_probe",
                                          config)
         submission_script = create_submission_template(config,
                                                        sample_name,
@@ -174,5 +171,6 @@ def start_analysis(project_pk):
         stdout, stderr = proc.communicate()
         codes[key] = stderr.split('/')[1].strip('].\n')
         # Delete injected files after done with them
-        #os.remove(inputs_json)
-        #os.remove(submission_script)
+        os.remove(inputs_json)
+        os.remove(submission_script)
+    # ToDo Add celery background task
