@@ -19,18 +19,16 @@ LINK_ROOT = 'https://storage.cloud.google.com/%s/%s'
 #TODO put this in settings.py?  can a non-app access?
 
 @task(name='check_completion')
-def check_completion(project, code_map, bucket_name):
+def check_completion(project_pk, code_map, bucket_name):
     '''
 
     params
-    project: 
+    project_pk: 
     code_map:
     bucket_name: bucket name
     '''
-    storage_client = storage.Client()
-    bucket = storage_client.get_bucket(bucket_name)
     while code_map:
-        for code, samplename in code_map.items():
+        for code, code_info_map in code_map.items():
             script = ' '.join(["gcloud alpha genomics operations describe",
                                code,
                                "--format='yaml(done, error, metadata.events)'"])
@@ -41,8 +39,19 @@ def check_completion(project, code_map, bucket_name):
             out_map = yaml.safe_load(stdout)
             done_status = out_map["done"]
             #errors[code] = out_map["error"]
+            # setting up file locations
             if done_status == True:
-                public_link = LINK_ROOT % (bucket.name, samplename)
+                # data format may be altered:
+                samplename, vcffilename, cloud_dge_dir = code_info_map
+                project = Project.objects.get(pk=project_pk)
+                storage_client = storage.Client()
+                bucket = storage_client.get_bucket(bucket_name)
+                # ToDo fix the path to file (must be sent to app)
+                vcffile = os.path.join(settings.TEMP_DIR)
+                destination = os.path.join(cloud_dge_dir,
+                                           os.path.basename(vcffile))
+                vcf_blob = bucket.blob(destination)
+                public_link = LINK_ROOT % (bucket.name, vcf_blob.name)
                 r = Resource(project=project,
                              basename=samplename,
                              public_link=public_link,
