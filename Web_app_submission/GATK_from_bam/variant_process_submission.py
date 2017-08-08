@@ -23,6 +23,7 @@ import email_utils
 from client_setup.models import Project, Sample
 from download.models import Resource
 from django.conf import settings
+from . import tasks
 CONFIG_FILE = os.path.join(os.path.abspath(os.path.dirname(__file__)),
                                            'config.cfg')
 CALLBACK_URL = 'analysis/notify/'
@@ -169,8 +170,11 @@ def start_analysis(project_pk):
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        codes[key] = stderr.split('/')[1].strip('].\n')
+        code_key = stderr.split('/')[1].strip('].\n')
+        # ToDo define codes data
+        codes[code_key] = ()
         # Delete injected files after done with them
         os.remove(inputs_json)
         os.remove(submission_script)
-    # ToDo Add celery background task
+    # celery background task for checking completion status of jobs
+    tasks.check_completion.delay(project_pk, codes, bucket_name)
