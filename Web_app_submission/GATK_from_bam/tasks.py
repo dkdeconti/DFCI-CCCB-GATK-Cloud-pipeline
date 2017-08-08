@@ -1,6 +1,7 @@
 # Create your tasks here
 from __future__ import absolute_import, unicode_literals
 from celery.decorators import task
+import time
 import subprocess
 import os
 import shutil
@@ -58,6 +59,7 @@ def check_completion(project_pk, code_map, bucket_name):
                              resource_type='VCF files')
                 r.save()
                 del code_map[code]
+        time.sleep(900)
     message_html = """
     <html>
     <body>
