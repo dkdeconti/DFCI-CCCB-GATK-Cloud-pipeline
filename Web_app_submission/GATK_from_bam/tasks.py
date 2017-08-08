@@ -48,7 +48,6 @@ def check_completion(project_pk, code_map, bucket_name):
                 storage_client = storage.Client()
                 bucket = storage_client.get_bucket(bucket_name)
                 # ToDo fix the path to file (must be sent to app)
-                vcffile = os.path.join(settings.TEMP_DIR)
                 destination = os.path.join(cloud_dge_dir,
                                            os.path.basename(vcffile))
                 vcf_blob = bucket.blob(destination)
