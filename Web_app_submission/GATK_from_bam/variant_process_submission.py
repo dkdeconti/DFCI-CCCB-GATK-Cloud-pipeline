@@ -155,7 +155,8 @@ def start_analysis(project_pk):
                              'config.cfg'))
     project, bucket_name, sample_mapping = setup(project_pk)
     # do work
-    codes = {}
+    #codes = {}
+    codes = []
     for key, ds_list in sample_mapping.items():
         ds = ds_list[0]
         sample_pk, sample_name = key
@@ -174,10 +175,14 @@ def start_analysis(project_pk):
         stdout, stderr = proc.communicate()
         code_key = stderr.split('/')[1].strip('].\n')
         # ToDo define codes data
-        codes[key] = {"code": code_key,
-                      "samplename": sample_name,
-                      "vcffilename": '.'.join([sample_name, "g.vcf"]),
-                      "bucket_path": output_folder}
+        #codes[key] = {"code": code_key,
+        #              "samplename": sample_name,
+        #              "vcffilename": '.'.join([sample_name, "g.vcf"]),
+        #              "bucket_path": out_folder}
+        codes.append((code_key,
+                      sample_name,
+                      '.'.join([sample_name, 'g.vcf']),
+                      out_folder))
         # Delete injected files after done with them
         os.remove(inputs_json)
         os.remove(submission_script)
