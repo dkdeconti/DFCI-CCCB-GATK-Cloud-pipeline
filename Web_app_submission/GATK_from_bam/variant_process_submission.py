@@ -117,6 +117,8 @@ def create_inputs_json(sample_name, bam, genome, config):
 
 def create_submission_template(config, sample_name, bucket, inputs):
     current_dir = os.path.abspath(os.path.dirname(__file__))
+    timestamp = datetime.datetime.now().strftime('%H%M%S')
+    output_folder = '-'.join([sample_name, timestamp, "output"])
     injects = {"BUCKET_INJECTION": bucket,
                "WDL_FILE": os.path.join(current_dir,
                                         config.get('default_templates',
@@ -125,13 +127,13 @@ def create_submission_template(config, sample_name, bucket, inputs):
                "OPTIONS_FILE": os.path.join(current_dir,
                                             config.get('default_templates',
                                                        'default_options')),
-               "OUTPUT_FOLDER": '-'.join([sample_name, "output"]),
+               "OUTPUT_FOLDER": output_folder,
                "YAML_FILE": os.path.join(current_dir,
                                          config.get('default_templates',
                                                     'default_yaml'))
                }
     template_file = os.path.join(current_dir, config.get('default_templates',
-                                                    'default_submission'))
+                                                         'default_submission'))
     with open(template_file) as filein:
         template_string = Template(filein.read())
     submission_string = \
@@ -141,7 +143,7 @@ def create_submission_template(config, sample_name, bucket, inputs):
     submission_file = os.path.join('/tmp/', submission_filename)
     with open(submission_file, 'w') as fileout:
         fileout.write(submission_string)
-    return submission_file
+    return output_folder, submission_file
 
 def start_analysis(project_pk):
     """
@@ -161,10 +163,10 @@ def start_analysis(project_pk):
         bam = "gs://" + os.path.join(project.bucket, ds.filepath)
         inputs_json = create_inputs_json(sample_name, bam, "hg19",
                                          config)
-        submission_script = create_submission_template(config,
-                                                       sample_name,
-                                                       bucket_name,
-                                                       inputs_json)
+        out_folder, submission_script = create_submission_template(config,
+                                                                   sample_name,
+                                                                   bucket_name,
+                                                                   inputs_json)
         proc = subprocess.Popen("sh %s" % submission_script,
                                 shell=True,
                                 stdout=subprocess.PIPE,
@@ -172,7 +174,10 @@ def start_analysis(project_pk):
         stdout, stderr = proc.communicate()
         code_key = stderr.split('/')[1].strip('].\n')
         # ToDo define codes data
-        codes[code_key] = ()
+        codes[key] = {"code": code_key,
+                      "samplename": sample_name,
+                      "vcffilename": '.'.join([sample_name, "g.vcf"]),
+                      "bucket_path": output_folder}
         # Delete injected files after done with them
         os.remove(inputs_json)
         os.remove(submission_script)
