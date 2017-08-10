@@ -63,6 +63,10 @@ def check_completion(project_pk, code_map, bucket_name):
                 r.save()
                 del code_map[code]
         time.sleep(900)
+    project.completed = True
+    project.in_progress = False
+    project.has_downloads = True
+    project.status_message = "Completed variant calling"
     message_html = """
     <html>
     <body>

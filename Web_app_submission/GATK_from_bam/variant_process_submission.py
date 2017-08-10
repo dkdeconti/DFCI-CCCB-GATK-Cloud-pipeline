@@ -188,3 +188,4 @@ def start_analysis(project_pk):
         os.remove(submission_script)
     # celery background task for checking completion status of jobs
     tasks.check_completion.delay(project_pk, codes, bucket_name)
+    project.in_progress = True
