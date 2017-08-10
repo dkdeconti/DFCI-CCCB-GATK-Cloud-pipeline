@@ -29,8 +29,8 @@ def check_completion(project_pk, code_map, bucket_name):
     bucket_name: bucket name
     '''
     while code_map:
-        for key, code_info_map in code_map.items():
-            code = code_info_map["code"]
+        for code_info_map in code_map:
+            code, samplename, vcffilename, cloud_dge_dir = code_info_map
             script = ' '.join(["gcloud alpha genomics operations describe",
                                code,
                                "--format='yaml(done, error, metadata.events)'"])
@@ -44,9 +44,9 @@ def check_completion(project_pk, code_map, bucket_name):
             # setting up file locations
             if done_status == True:
                 # data format may be altered:
-                samplename = code_info_map["samplename"]
-                vcffilename = code_info_map["vcffilename"]
-                cloud_dge_dir = code_info_map["bucket_path"]
+                #samplename = code_info_map["samplename"]
+                #vcffilename = code_info_map["vcffilename"]
+                #cloud_dge_dir = code_info_map["bucket_path"]
                 #samplename, vcffilename, cloud_dge_dir = code_info_map # fix this!!!
                 project = Project.objects.get(pk=project_pk)
                 storage_client = storage.Client()
