@@ -3,11 +3,9 @@
 ##############################################################################
 
 workflow GenotypeAndQC {
-    File input_bams_vcfs_file
-    File input_genotyped_vcf
-    Array[Array[File]] input_bams_vcfs = read_tsv(input_bams_vcfs_file)
+    File input_bams_file
+    Array[Array[File]] input_bams = read_line(input_bams_file)
     String output_basename
-    File ped
     
     File ref_fasta
     File ref_fasta_index
@@ -15,7 +13,7 @@ workflow GenotypeAndQC {
 
     File probe_intervals
 
-    scatter (bams_vcfs in input_bams_vcfs) {
+    scatter (input_bam in input_bams) {
         File input_bam = bams_vcfs[0]
         File input_bam_index = bams_vcfs[1]
         File input_vcf = bams_vcfs[2]
