@@ -13,39 +13,50 @@ workflow GenotypeAndQC {
 
     File probe_intervals
 
+    Int small_disk = 200
+    Int medium_disk = 300
+    Int large_disk = 400
+
     scatter (input_bam in input_bams) {
         File input_bam = bams_vcfs[0]
         File input_bam_index = bams_vcfs[1]
         File input_vcf = bams_vcfs[2]
         String vbd_output_basename = bams_vcfs[3]
     
-        #call VerifyBamID {
-        #    input:
-        #        input_vcf = input_vcf,
-        #        input_bam = input_bam,
-        #        input_bam_index = input_bam_index,
-        #        output_basename = vbd_output_basename
-        #}
+        call VerifyBamID {
+            input:
+                input_vcf = input_vcf,
+                input_bam = input_bam,
+                input_bam_index = input_bam_index,
+                output_basename = vbd_output_basename,
+                disk_size = small_disk
+        }
         call DepthOfCoverage {
             input:
                 input_bam = input_bam,
                 input_bam_index = input_bam_index,
                 probe_intervals = probe_intervals,
-                output_basename = vbd_output_basename
+                output_basename = vbd_output_basename,
+                disk_size = large_disk
         }
     }
-    #call MergeVerifyBamID {
-    #    input:
-    #        inputs_selfsm = VerifyBamID.output_selfsm,
-    #        output_basename = output_basename
-    #}
+    call MergeVerifyBamID {
+        input:
+            inputs_selfsm = VerifyBamID.output_selfsm,
+            output_basename = output_basename,
+            disk_size = medium_disk
+    }
+    PlotDepthOfCoverage {
+        input:
+            input_beds = DepthOfCoverage.coverage_bed,
+            disk_size = large_disk
+    }
     output {
         PlotDepthOfCoverage.sample_statistics
         PlotDepthOfCoverage.sample_summary
         PlotDepthOfCoverage.depth_histogram
         PlotDepthOfCoverage.depth_boxplot
-        PlotFStat.f_stats_plot
-        #MergeVerifyBamID.output_vbd
+        MergeVerifyBamID.output_vbd
     }
 }
 
@@ -68,6 +79,13 @@ task VerifyBamID {
             --verbose \
             --out ${output_basename}
     }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
+        cpu: "1"
+        memory: "6 GB"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
     output {
         File output_selfrg = "${output_basename}.selfRG"
         File output_selfsm = "${output_basename}.selfSM"
@@ -84,6 +102,13 @@ task MergeVerifyBamID {
 
     command{
         cat ${sep=" " inputs_selfsm} > ${output_basename}.selfSM
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
+        cpu: "1"
+        memory: "6 GB"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
     }
     output {
         File output_vbd = "${output_basename}.selfSM"
@@ -103,6 +128,13 @@ task DepthOfCoverage {
         -hist | \
         grep "^all" > ${output_basename}.coverage.all_only.bed
     }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
+        cpu: "1"
+        memory: "6 GB"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
     output {
         File coverage_bed = "${output_basename}.coverage.all_only.bed"
     }
@@ -116,6 +148,13 @@ task PlotDepthOfCoverage {
         ${sep=' ' input_beds}
         Rscript ~/scratch/QC_test/create_coverage_heatmap.R \
         coverage.sample_statistics coverage.sample_summary
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
+        cpu: "1"
+        memory: "6 GB"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
     }
     output {
         File sample_statistics = "coverage.sample_statistics"
