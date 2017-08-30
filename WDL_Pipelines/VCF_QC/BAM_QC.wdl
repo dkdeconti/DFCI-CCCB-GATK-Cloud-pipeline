@@ -71,7 +71,7 @@ task VerifyBamID {
     String output_basename
 
     command {
-        ~/bin/verifyBamID \
+        /usr/bin_dir/verifyBamID \
             --vcf ${input_vcf} \
             --bam ${input_bam} \
             --maxDepth1000 \
@@ -122,7 +122,7 @@ task DepthOfCoverage {
     String output_basename
 
     command {
-        ~/bin/bedtools coverage \
+        /usr/bin_dir/bedtools coverage \
         -abam ${input_bam} \
         -b ${probe_intervals} \
         -hist | \
@@ -144,15 +144,15 @@ task PlotDepthOfCoverage {
     Array[File] input_beds
 
     command {
-        python ~/scratch/QC_test/convert_bedtools_hist_to_GATK_DoC.py \
+        python /usr/bin_dir/convert_bedtools_hist_to_GATK_DoC.py \
         ${sep=' ' input_beds}
-        Rscript ~/scratch/QC_test/create_coverage_heatmap.R \
+        Rscript /usr/bin_dir/create_coverage_heatmap.R \
         coverage.sample_statistics coverage.sample_summary
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
         cpu: "1"
-        memory: "6 GB"
+        memory: "4 GB"
         disks: "local-disk " + disk_size + " HDD"
         preemptible: preemptible_tries
     }
@@ -161,5 +161,23 @@ task PlotDepthOfCoverage {
         File sample_summary = "coverage.sample_summary"
         File depth_histogram = "depth_histogram.pdf"
         File depth_boxplot = "depth_boxplot.pdf"
+    }
+}
+
+task PlotVerifyBamID {
+    File input_verifybamidoutput
+
+    command {
+        Rscript /usr/bin_dir/create_verifybamid_plot.R ${input_verifybamidoutput}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/exome-bam-qc"
+        cpu: "1"
+        memory: "4 GB"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File verifyBamID_plot = "verifyBamID_FREEMIX.pdf"
     }
 }
