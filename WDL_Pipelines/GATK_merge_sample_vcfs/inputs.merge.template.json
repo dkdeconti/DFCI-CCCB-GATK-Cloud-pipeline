@@ -1,0 +1,12 @@
+{
+    "MergeVCFs.input_vcf_array_file": "gs://dfci-cccb-lp-06092017-1322/VCF_INJECTION",
+    "MergeVCFs.input_vcf_index_array_file": "gs://dfci-cccb-lp-06092017-1322/INDEX_INJECTION",
+    "MergeVCFs.scattered_calling_intervals_list_file": "gs://dfci-cccb-exome-reference-genomes/hg19/Haloplex_whole_exome_agilent_v1_1/merge_E02_Exome_probes_V2-whole_exome_agilent_1.1_refseq_plus_3_boosters_plusMinus1kb.hard_coded.list",
+    "MergeVCFs.output_vcf_basename": "NAME_INJECTION",
+    "MergeVCFs.ref_fasta": "gs://dfci-cccb-exome-reference-genomes/hg19/ucsc.hg19.fasta",
+    "MergeVCFs.ref_fasta_index": "gs://dfci-cccb-exome-reference-genomes/hg19/ucsc.hg19.fasta.fai",
+    "MergeVCFs.ref_dict": "gs://dfci-cccb-exome-reference-genomes/hg19/ucsc.hg19.dict",
+    "MergeVCFs.small_disk": "800",
+    "MergeVCFs.preemptible_tries": "3"
+}
+  
