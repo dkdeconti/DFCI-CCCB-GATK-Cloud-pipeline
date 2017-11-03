@@ -23,7 +23,15 @@ workflow GenotypeAndQC {
     Int large_disk
 
     scatter (input_vcf in input_vcfs) {
-        call SortVCF {
+        #call SortVCF {
+        #    input:
+        #        input_vcf = input_vcf,
+        #        ref_fasta = ref_fasta,
+        #        ref_fasta_index = ref_fasta_index,
+        #        ref_dict = ref_dict,
+        #        disk_size = small_disk
+        #}
+        call IndexVCF {
             input:
                 input_vcf = input_vcf,
                 ref_fasta = ref_fasta,
@@ -35,13 +43,14 @@ workflow GenotypeAndQC {
     scatter (scatter_interval in scattered_calling_intervals) {
         call GenotypeGVCFs {
             input:
-                input_vcfs = SortVCF.output_sorted_vcf,
+                input_vcfs = input_vcfs,
+                input_vcf_indices = IndexVCF.output_vcf_index,
                 interval_list = scatter_interval,
                 output_basename = output_basename,
                 ref_dict = ref_dict,
                 ref_fasta = ref_fasta,
                 ref_fasta_index = ref_fasta_index,
-                disk_size = medium_disk
+                disk_size = large_disk
         }
     }
     call MergeGenotypedVCF {
@@ -55,7 +64,6 @@ workflow GenotypeAndQC {
     }
     output {
         MergeGenotypedVCF.output_vcf
-        SortVCF.*
     }
 }
 
@@ -87,8 +95,35 @@ task SortVCF {
     }
 }
 
+task IndexVCF {
+    File input_vcf
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+
+    Int disk_size
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/GATK.jar \
+            -T ValidateVariants \
+            -R ${ref_fasta} \
+            -V ${input_vcf} \
+            --validationTypeToExclude ALL
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+    }
+    output {
+        File output_vcf_index = "${input_vcf}.idx"
+    }
+}
+
 task GenotypeGVCFs {
     Array[File] input_vcfs
+    Array[File] input_vcfs_indices
     File interval_list
     String output_basename
     File ref_dict
