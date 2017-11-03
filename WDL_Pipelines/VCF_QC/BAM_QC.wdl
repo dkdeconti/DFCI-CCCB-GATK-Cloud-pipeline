@@ -26,40 +26,36 @@ workflow BamQC {
         #File input_vcf_index = bams_vcfs[3]
         #String vbd_output_basename = bams_vcfs[4]
     
-        call VerifyBamID {
-            input:
-                input_vcf = thousand_genomes_vcf,
-                input_bam = bams_vcfs[0],
-                input_bam_index = bams_vcfs[1],
-                output_basename = bams_vcfs[4],
-                disk_size = small_disk
-        }
+        #call VerifyBamID {
+        #    input:
+        #        input_vcf = thousand_genomes_vcf,
+        #        input_bam = bams_vcfs[0],
+        #        input_bam_index = bams_vcfs[1],
+        #        output_basename = bams_vcfs[4],
+        #        disk_size = small_disk
+        #}
         call DepthOfCoverage {
             input:
                 input_bam = bams_vcfs[0],
                 input_bam_index = bams_vcfs[1],
                 output_basename = bams_vcfs[4],
                 probe_intervals = probe_intervals_bed,
-                disk_size = small_disk
+                disk_size = medium_disk
         }
     }
-    call MergeVerifyBamID {
-        input:
-            inputs_selfsm = VerifyBamID.output_selfsm,
-            output_basename = output_basename,
-            disk_size = small_disk
-    }
-    call PlotDepthOfCoverage {
-        input:
-            input_beds = DepthOfCoverage.coverage_bed,
-            disk_size = small_disk
-    }
+    #call MergeVerifyBamID {
+    #    input:
+    #        inputs_selfsm = VerifyBamID.output_selfsm,
+    #        output_basename = output_basename,
+    #        disk_size = small_disk
+    #}
+    #call PlotDepthOfCoverage {
+    #    input:
+    #        input_beds = DepthOfCoverage.coverage_bed,
+    #        disk_size = small_disk
+    #}
     output {
-        PlotDepthOfCoverage.sample_statistics
-        PlotDepthOfCoverage.sample_summary
-        PlotDepthOfCoverage.depth_histogram
-        PlotDepthOfCoverage.depth_boxplot
-        MergeVerifyBamID.output_vbd
+        DepthOfCoverage.coverage_all_bed
     }
 }
 
@@ -134,11 +130,17 @@ task DepthOfCoverage {
 
 
     command {
-        /usr/bin_dir/bedtools coverage \
-        -abam ${input_bam} \
-        -b ${probe_intervals} \
-        -hist > ${output_basename}.coverage.bed;
-        grep "^all" ${output_basename}.coverge.bed  > ${output_basename}.coverage.all_only.bed;
+        mkdir ./tmp_dir;
+        /usr/bin_dir/bedtools bamtobed -i ${input_bam} | sort -T ./tmp_dir -k 1,1 -k2,2n > ${output_basename}.bam2bed.bed;
+        sort -T ./tmp_dir -k 1,1 -k2,2n ${probe_intervals} > ${probe_intervals}.sorted;
+        /usr/bin_dir/bedtools coverage -a ${probe_intervals}.sorted -b ${output_basename}.bam2bed.bed -hist -sorted | grep "^all" > ${output_basename}.coverage.all_only.bed;
+
+        #/usr/bin_dir/bedtools coverage \
+        #-abam ${input_bam} \
+        #-b ${probe_intervals} \
+        #-hist > ${output_basename}.coverage.bed;
+        #grep "^all" ${output_basename}.coverge.bed  \
+        #> ${output_basename}.coverage.all_only.bed;
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/bam-qc"
@@ -147,7 +149,7 @@ task DepthOfCoverage {
         disks: "local-disk " + disk_size + " HDD"
     }
     output {
-        File coverage_bed = "${output_basename}.coverage.bed"
+        #File coverage_bed = "${output_basename}.coverage.bed"
         File coverage_all_bed = "${output_basename}.coverage.all_only.bed"
     }
 }
