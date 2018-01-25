@@ -77,3 +77,86 @@ task GetBwaVersion {
     }
 }
 
+task BwaMemTumor {
+    File input_first_tumor_fastq
+    File input_second_tumor_fastq
+    File output_tumor_bam_basename
+
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+    File ref_amb
+    File ref_ann
+    File ref_bwt
+    File ref_pac
+    File ref_sa
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        ${bwa_commandline} \
+            ${input_first_tumor_fastq} \
+            ${input_second_tumor_fastq} \
+        2> >(tee ${output_tumor_bam_basename}.bwa.stderr.log >&2) \
+        > ${output_tumor_bam_basename}.sam
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            SamFormatConverter \
+            I=${output_tumor_bam_basename}.sam \
+            O=${output_tumor_bam_basename}.bam
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        cpu: "3"
+        memory: "14 GB"
+        cpu: "16"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_tumor_bam_basename}.bam"
+        File bwa_stderr_log = "${output_tumor_bam_basename}.bwa.stderr.log"
+    }
+}
+
+task BwaMemNormal {
+    File input_first_tumor_fastq
+    File input_second_tumor_fastq
+    File output_tumor_bam_basename
+
+    File ref_fasta
+    File ref_fasta_index
+    File ref_dict
+    File ref_amb
+    File ref_ann
+    File ref_bwt
+    File ref_pac
+    File ref_sa
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        ${bwa_commandline} \
+            ${input_first_tumor_fastq} \
+            ${input_second_tumor_fastq} \
+        2> >(tee ${output_tumor_bam_basename}.bwa.stderr.log >&2) \
+        > ${output_tumor_bam_basename}.sam
+        java -Xmx2500m -jar /usr/bin_dir/picard.jar \
+            SamFormatConverter \
+            I=${output_tumor_bam_basename}.sam \
+            O=${output_tumor_bam_basename}.bam
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        cpu: "3"
+        memory: "14 GB"
+        cpu: "16"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_tumor_bam_basename}.bam"
+        File bwa_stderr_log = "${output_tumor_bam_basename}.bwa.stderr.log"
+    }
+}
