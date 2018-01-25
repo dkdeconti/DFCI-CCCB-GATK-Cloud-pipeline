@@ -37,14 +37,27 @@ workflow RealignAndVariantCalling {
     Int preemptible_tries
 
     call GetBwaVersion
-    call BwaMem {
+    call BwaMemTumor {
+        input:
+            input_first_tumor_fastq = input_first_tumor_fastq,
+            input_second_tumor_fastq = input_second_tumor_fastq,
+            output_tumor_bam_basename = output_tumor_basename,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            ref_dict = ref_dict,
+            ref_bwt = ref_bwt,
+            ref_amb = ref_amb,
+            ref_ann = ref_ann,
+            ref_pac = ref_pac,
+            ref_sa = ref_sa,
+            disk_size = large_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call BWAMemNormal {
         input:
             input_first_normal_fastq = input_first_normal_fastq,
             input_second_normal_fastq = input_second_normal_fastq,
-            input_first_tumor_fastq = input_first_tumor_fastq,
-            input_second_tumor_fastq = input_second_tumor_fastq,
             output_normal_bam_basename = output_normal_basename,
-            output_tumor_bam_basename = output_tumor_basename,
             ref_fasta = ref_fasta,
             ref_fasta_index = ref_fasta_index,
             ref_dict = ref_dict,
@@ -120,9 +133,9 @@ task BwaMemTumor {
 }
 
 task BwaMemNormal {
-    File input_first_tumor_fastq
-    File input_second_tumor_fastq
-    File output_tumor_bam_basename
+    File input_first_normal_fastq
+    File input_second_normal_fastq
+    File output_normal_bam_basename
 
     File ref_fasta
     File ref_fasta_index
@@ -138,14 +151,14 @@ task BwaMemNormal {
 
     command {
         ${bwa_commandline} \
-            ${input_first_tumor_fastq} \
-            ${input_second_tumor_fastq} \
-        2> >(tee ${output_tumor_bam_basename}.bwa.stderr.log >&2) \
-        > ${output_tumor_bam_basename}.sam
+            ${input_first_normal_fastq} \
+            ${input_second_normal_fastq} \
+        2> >(tee ${output_normal_bam_basename}.bwa.stderr.log >&2) \
+        > ${output_normal_bam_basename}.sam
         java -Xmx2500m -jar /usr/bin_dir/picard.jar \
             SamFormatConverter \
-            I=${output_tumor_bam_basename}.sam \
-            O=${output_tumor_bam_basename}.bam
+            I=${output_normal_bam_basename}.sam \
+            O=${output_normal_bam_basename}.bam
     }
     runtime {
         docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
@@ -156,7 +169,7 @@ task BwaMemNormal {
         preemptible: preemptible_tries
     }
     output {
-        File output_bam = "${output_tumor_bam_basename}.bam"
-        File bwa_stderr_log = "${output_tumor_bam_basename}.bwa.stderr.log"
+        File output_bam = "${output_normal_bam_basename}.bam"
+        File bwa_stderr_log = "${output_normal_bam_basename}.bwa.stderr.log"
     }
 }
