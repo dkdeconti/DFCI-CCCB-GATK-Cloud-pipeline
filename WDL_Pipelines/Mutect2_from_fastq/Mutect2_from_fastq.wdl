@@ -166,6 +166,24 @@ workflow RealignAndVariantCalling {
                 disk_size = small_disk
         }
     }
+    call MergeVCFs {
+        input:
+            input_vcfs = Mutect2Caller.output_vcf,
+            output_vcf_name = output_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+
+    output {
+        ApplyBQSRNormal.recalibrated_bam
+        ApplyBQSRNormal.recalibrated_bam_index
+        ApplyBQSRTumor.recalibrated_bam
+        ApplyBQSRTumor.recalibrated_bam_index
+        MergeVCFs.output_vcf
+    }
 }
 
 ##############################################################################
@@ -529,5 +547,34 @@ task Mutect2Caller {
     }
     output {
         File output_vcf = "${vcf_name}.vcf"
+    }
+}
+
+task MergeVCFs {
+    Array[File] input_vcfs
+    String output_vcf_name
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx3000m -cp /usr/bin_dir/GATK.jar \
+            org.broadinstitute.gatk.tools.CatVariants \
+            -R ${ref_fasta} \
+            -V ${sep=' -V ' input_vcfs} \
+            -out ${output_vcf_name}.vcf \
+            --assumeSorted
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "4 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_vcf = "${output_vcf_name}.vcf"
     }
 }
