@@ -93,6 +93,60 @@ workflow RealignAndVariantCalling {
             disk_size = medium_disk,
             preemptible_tries = preemptible_tries
     }
+    call BaseRecalibratorNormal {
+        input:
+            input_bam = SortAndFixTagsNormal.output_bam,
+            input_bam_index = SortAndFixTagsNormal.output_bam_index,
+            recalibration_report_filename = output_normal_basename + ".recal_data.table",
+            dbsnp = dbsnp,
+            dbsnp_index = dbsnp_index,
+            known_indels = known_indels,
+            known_indels_index = known_indels_index,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call ApplyBQSRNormal {
+        input:
+            input_bam = SortAndFixTagsNormal.output_bam,
+            input_bam_index = SortAndFixTagsNormal.output_bam_index,
+            output_bam_basename = output_normal_basename,
+            recalibration_report = BaseRecalibratorNormal.recalibration_report,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call BaseRecalibratorTumor {
+        input:
+            input_bam = SortAndFixTagsTumor.output_bam,
+            input_bam_index = SortAndFixTagsTumor.output_bam_index,
+            recalibration_report_filename = output_tumor_basename + ".recal_data.table",
+            dbsnp = dbsnp,
+            dbsnp_index = dbsnp_index,
+            known_indels = known_indels,
+            known_indels_index = known_indels_index,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call ApplyBQSRTumor {
+        input:
+            input_bam = SortAndFixTagsTumor.output_bam,
+            input_bam_index = SortAndFixTagsTumor.output_bam_index,
+            output_bam_basename = output_tumor_basename,
+            recalibration_report = BaseRecalibratorTumor.recalibration_report,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = small_disk,
+            preemptible_tries = preemptible_tries
+    }
 }
 
 ##############################################################################
@@ -277,5 +331,143 @@ task SortAndFixTagsTumor {
     output {
         File output_bam = "${output_bam_basename}.sorted.bam"
         File output_bam_index = "${output_bam_basename}.sorted.bai"
+    }
+}
+
+task BaseRecalibratorNormal {
+    File input_bam
+    File input_bam_index
+    String recalibration_report_filename
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx4000m -jar /usr/bin_dir/GATK.jar \
+            -T BaseRecalibrator \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${recalibration_report_filename} \
+            -knownSites ${dbsnp} \
+            -knownSites ${known_indels}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "5000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibration_report = "${recalibration_report_filename}"
+    }
+}
+
+task BaseRecalibratorTumor {
+    File input_bam
+    File input_bam_index
+    String recalibration_report_filename
+    File dbsnp
+    File dbsnp_index
+    File known_indels
+    File known_indels_index
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx4000m -jar /usr/bin_dir/GATK.jar \
+            -T BaseRecalibrator \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${recalibration_report_filename} \
+            -knownSites ${dbsnp} \
+            -knownSites ${known_indels}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "5000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibration_report = "${recalibration_report_filename}"
+    }
+}
+
+task ApplyBQSRNormal {
+    File input_bam
+    File input_bam_index
+    String output_bam_basename
+    File recalibration_report
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2000m -jar /usr/bin_dir/GATK.jar \
+            -T PrintReads \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -BQSR ${recalibration_report}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "3 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
+    }
+}
+
+task ApplyBQSRTumor {
+    File input_bam
+    File input_bam_index
+    String output_bam_basename
+    File recalibration_report
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx2000m -jar /usr/bin_dir/GATK.jar \
+            -T PrintReads \
+            -R ${ref_fasta} \
+            -I ${input_bam} \
+            -o ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -BQSR ${recalibration_report}
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "3 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
     }
 }
