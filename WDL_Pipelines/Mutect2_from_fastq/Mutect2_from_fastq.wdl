@@ -25,6 +25,7 @@ workflow RealignAndVariantCalling {
     File dbsnp_index
     File known_indels
     File known_indels_index
+    File gnomad_vcf
 
     String bwa_commandline="bwa mem -p -v 3 -t 3 $bash_ref_fasta"
 
@@ -146,6 +147,24 @@ workflow RealignAndVariantCalling {
             ref_fasta_index = ref_fasta_index,
             disk_size = small_disk,
             preemptible_tries = preemptible_tries
+    }
+    scatter (scatter_interval in scattered_calling_intervals) {
+        call Mutect2Caller {
+            input:
+                input_normal_bam = ApplyBQSRNormal.recalibrated_bam,
+                input_normal_bam_index = ApplyBQSRNormal.recalibrated_bam_index,
+                normal_basename = output_normal_basename,
+                input_tumor_bam = ApplyBQSRTumor.recalibrated_bam,
+                input_tumor_bam_index = ApplyBQSRTumor.recalibrated_bam_index,
+                tumor_basename = output_tumor_basename,
+                interval_list = scatter_interval,
+                gnomad_vcf = gnomad_vcf,
+                vcf_name = output_basename,
+                ref_dict = ref_dict,
+                ref_fasta = ref_fasta,
+                ref_fasta_index = ref_fasta_index,
+                disk_size = small_disk
+        }
     }
 }
 
@@ -423,7 +442,7 @@ task ApplyBQSRNormal {
             -T PrintReads \
             -R ${ref_fasta} \
             -I ${input_bam} \
-            -o ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -o ${output_bam_basename}.sorted.bqsr.bam \
             -BQSR ${recalibration_report}
     }
     runtime {
@@ -434,8 +453,8 @@ task ApplyBQSRNormal {
         preemptible: preemptible_tries
     }
     output {
-        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
-        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
+        File recalibrated_bam = "${output_bam_basename}.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.sorted.bqsr.bai"
     }
 }
 
@@ -456,7 +475,7 @@ task ApplyBQSRTumor {
             -T PrintReads \
             -R ${ref_fasta} \
             -I ${input_bam} \
-            -o ${output_bam_basename}.realn.sorted.bqsr.bam \
+            -o ${output_bam_basename}.sorted.bqsr.bam \
             -BQSR ${recalibration_report}
     }
     runtime {
@@ -467,7 +486,48 @@ task ApplyBQSRTumor {
         preemptible: preemptible_tries
     }
     output {
-        File recalibrated_bam = "${output_bam_basename}.realn.sorted.bqsr.bam"
-        File recalibrated_bam_index = "${output_bam_basename}.realn.sorted.bqsr.bai"
+        File recalibrated_bam = "${output_bam_basename}.sorted.bqsr.bam"
+        File recalibrated_bam_index = "${output_bam_basename}.sorted.bqsr.bai"
+    }
+}
+
+task Mutect2Caller {
+    File input_normal_bam
+    File input_normal_bam_index
+    String normal_basename
+    File input_tumor_bam
+    File input_tumor_bam_index
+    String tumor_basename
+    File interval_list
+    File gnomad_vcf
+    String vcf_name
+    
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+    
+    Int disk_size
+    
+    command {
+        # ToDo Add a panel of normals in the future.
+        java -Xmx8000m -jar /usr/bin_dir/gatk4.jar Mutect2 \
+            -R ${ref_fasta} \
+            -I ${input_tumor_bam} \
+            -tumor ${tumor_basename} \
+            -I ${input_normal_bam} \
+            -normal ${normal_basename} \
+            --germline-resource ${gnomad_vcf} \
+            -L ${interval_list} \
+            -O ${vcf_name}.vcf
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools" # TODO change to gatk4-beta
+        memory: "10 GB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_vcf = "${vcf_name}.vcf"
     }
 }
