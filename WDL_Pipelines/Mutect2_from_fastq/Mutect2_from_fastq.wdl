@@ -7,6 +7,8 @@ workflow RealignAndVariantCalling {
     File input_second_normal_fastq
     File input_first_tumor_fastq
     File input_second_tumor_fastq
+    String input_normal_rgid
+    String input_tumor_rgid
     String output_basename
     File scattered_calling_intervals_list_file
     Array[File] scattered_calling_intervals = read_lines(scattered_calling_intervals_list_file)
@@ -41,6 +43,7 @@ workflow RealignAndVariantCalling {
         input:
             input_first_tumor_fastq = input_first_tumor_fastq,
             input_second_tumor_fastq = input_second_tumor_fastq,
+            input_rgid = input_tumor_rgid,
             output_tumor_bam_basename = output_tumor_basename,
             ref_fasta = ref_fasta,
             ref_fasta_index = ref_fasta_index,
@@ -57,6 +60,7 @@ workflow RealignAndVariantCalling {
         input:
             input_first_normal_fastq = input_first_normal_fastq,
             input_second_normal_fastq = input_second_normal_fastq,
+            input_rgid = input_normal_rgid,
             output_normal_bam_basename = output_normal_basename,
             ref_fasta = ref_fasta,
             ref_fasta_index = ref_fasta_index,
@@ -94,6 +98,7 @@ task BwaMemTumor {
     File input_first_tumor_fastq
     File input_second_tumor_fastq
     File output_tumor_bam_basename
+    String input_rgid
 
     File ref_fasta
     File ref_fasta_index
@@ -109,6 +114,7 @@ task BwaMemTumor {
 
     command {
         ${bwa_commandline} \
+            -R '${input_rgid}' \
             ${input_first_tumor_fastq} \
             ${input_second_tumor_fastq} \
         2> >(tee ${output_tumor_bam_basename}.bwa.stderr.log >&2) \
@@ -136,6 +142,7 @@ task BwaMemNormal {
     File input_first_normal_fastq
     File input_second_normal_fastq
     File output_normal_bam_basename
+    String input_rgid
 
     File ref_fasta
     File ref_fasta_index
@@ -151,6 +158,7 @@ task BwaMemNormal {
 
     command {
         ${bwa_commandline} \
+            -R '${input_rgid}' \
             ${input_first_normal_fastq} \
             ${input_second_normal_fastq} \
         2> >(tee ${output_normal_bam_basename}.bwa.stderr.log >&2) \
