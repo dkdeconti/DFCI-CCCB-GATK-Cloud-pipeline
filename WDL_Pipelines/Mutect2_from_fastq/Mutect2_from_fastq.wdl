@@ -56,7 +56,7 @@ workflow RealignAndVariantCalling {
             disk_size = large_disk,
             preemptible_tries = preemptible_tries
     }
-    call BWAMemNormal {
+    call BwaMemNormal {
         input:
             input_first_normal_fastq = input_first_normal_fastq,
             input_second_normal_fastq = input_second_normal_fastq,
@@ -71,6 +71,26 @@ workflow RealignAndVariantCalling {
             ref_pac = ref_pac,
             ref_sa = ref_sa,
             disk_size = large_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call SortAndFixTagsNormal {
+        input:
+            input_bam = BwaMemNormal.output_bam,
+            output_bam_basename = output_normal_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = medium_disk,
+            preemptible_tries = preemptible_tries
+    }
+    call SortAndFixTagsTumor {
+        input:
+            input_bam = BwaMemTumor.output_bam,
+            output_bam_basename = output_tumor_basename,
+            ref_dict = ref_dict,
+            ref_fasta = ref_fasta,
+            ref_fasta_index = ref_fasta_index,
+            disk_size = medium_disk,
             preemptible_tries = preemptible_tries
     }
 }
@@ -179,5 +199,83 @@ task BwaMemNormal {
     output {
         File output_bam = "${output_normal_bam_basename}.bam"
         File bwa_stderr_log = "${output_normal_bam_basename}.bwa.stderr.log"
+    }
+}
+
+task SortAndFixTagsNormal {
+    File input_bam
+    String output_bam_basename
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/picard.jar \
+            SortSam \
+            INPUT=${input_bam} \
+            OUTPUT=/dev/stdout \
+            SORT_ORDER="coordinate" \
+            CREATE_INDEX=false \
+            CREATE_MD5_FILE=false | \
+        java -Xmx1000m -jar /usr/bin_dir/picard.jar \
+            SetNmAndUqTags \
+            INPUT=/dev/stdin \
+            OUTPUT=${output_bam_basename}.sorted.bam \
+            CREATE_INDEX=true \
+            CREATE_MD5_FILE=false \
+            REFERENCE_SEQUENCE=${ref_fasta};
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.sorted.bam"
+        File output_bam_index = "${output_bam_basename}.sorted.bai"
+    }
+}
+
+task SortAndFixTagsTumor {
+    File input_bam
+    String output_bam_basename
+    File ref_dict
+    File ref_fasta
+    File ref_fasta_index
+
+    Int disk_size
+    Int preemptible_tries
+
+    command {
+        java -Xmx8000m -jar /usr/bin_dir/picard.jar \
+            SortSam \
+            INPUT=${input_bam} \
+            OUTPUT=/dev/stdout \
+            SORT_ORDER="coordinate" \
+            CREATE_INDEX=false \
+            CREATE_MD5_FILE=false | \
+        java -Xmx1000m -jar /usr/bin_dir/picard.jar \
+            SetNmAndUqTags \
+            INPUT=/dev/stdin \
+            OUTPUT=${output_bam_basename}.sorted.bam \
+            CREATE_INDEX=true \
+            CREATE_MD5_FILE=false \
+            REFERENCE_SEQUENCE=${ref_fasta};
+    }
+    runtime {
+        docker: "gcr.io/exome-pipeline-project/basic-seq-tools"
+        memory: "10000 MB"
+        cpu: "1"
+        disks: "local-disk " + disk_size + " HDD"
+        preemptible: preemptible_tries
+    }
+    output {
+        File output_bam = "${output_bam_basename}.sorted.bam"
+        File output_bam_index = "${output_bam_basename}.sorted.bai"
     }
 }
