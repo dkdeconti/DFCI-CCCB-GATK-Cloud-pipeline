@@ -157,6 +157,9 @@ def start_analysis(project_pk):
     # do work
     #codes = {}
     codes = []
+    matched_pairs = []
+    for sample in sample_mapping:
+        pass
     for key, ds_list in sample_mapping.items():
         ds = ds_list[0]
         sample_pk, sample_name = key
